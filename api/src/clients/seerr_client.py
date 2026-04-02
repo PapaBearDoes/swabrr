@@ -7,8 +7,8 @@ Seerr (Overseerr/Jellyseerr) API client. Fetches media request history,
 requestor identity, and request dates. Maps directly to TMDB IDs.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -72,7 +72,6 @@ class SeerrClient(BaseClient):
                     "take": page_size,
                     "skip": (page - 1) * page_size,
                     "sort": "added",
-                    "requestedBy": "",
                 },
                 headers=await self._get_headers(),
             )

@@ -7,8 +7,8 @@ Base HTTP client with shared retry, timeout, and error handling logic.
 All service-specific clients inherit from this class.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -101,7 +101,9 @@ class BaseClient:
                     )
                 else:
                     # 4xx errors are not retryable
-                    self._log.error(
+                    # 404s are expected (e.g. TMDB ID no longer exists)
+                    log_fn = self._log.debug if status == 404 else self._log.error
+                    log_fn(
                         f"{self.service_name}: Client error {status} on {path}: "
                         f"{e.response.text[:200]}"
                     )

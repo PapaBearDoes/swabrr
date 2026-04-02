@@ -7,8 +7,8 @@ TMDB API client. Fetches streaming availability (watch providers),
 ratings, vote counts, and resolves TVDB IDs to TMDB IDs.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.1.0
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -18,6 +18,7 @@ Repository: https://github.com/PapaBearDoes/swabbarr
 import asyncio
 import logging
 import os
+import time
 from dataclasses import dataclass, field
 
 from src.clients.base_client import BaseClient
@@ -53,7 +54,7 @@ class TMDBClient(BaseClient):
             **kwargs,
         )
         self._region = region or os.environ.get("SWABBARR_TMDB_REGION", "US")
-        self._rate_delay = 0.03  # ~33 req/s, under TMDB's 40/s limit
+        self._rate_delay = 0.05  # ~20 req/s, conservative under TMDB's 40/s limit
 
     @property
     def service_name(self) -> str:
@@ -215,9 +216,14 @@ class TMDBClient(BaseClient):
             to_fetch = list(tmdb_ids)
 
         # Fetch uncached titles from TMDB API
+        total_to_fetch = len(to_fetch)
         self._log.info(
-            f"TMDB: {len(results)} cached, {len(to_fetch)} to fetch"
+            f"TMDB: {len(results)} cached, {total_to_fetch} to fetch"
         )
+
+        fetched = 0
+        skipped = 0
+        last_progress = time.monotonic()
 
         for tmdb_id, media_type in to_fetch:
             info = await self.get_info(tmdb_id, media_type)
@@ -226,8 +232,25 @@ class TMDBClient(BaseClient):
                 # Write to cache
                 if db_manager:
                     await self._cache_result(db_manager, info)
+                fetched += 1
+            else:
+                skipped += 1
 
-        self._log.success(f"TMDB: Fetched data for {len(results)} titles")
+            # Progress log every 5 seconds
+            now = time.monotonic()
+            if now - last_progress >= 5.0:
+                done = fetched + skipped
+                pct = (done / total_to_fetch * 100) if total_to_fetch else 0
+                self._log.info(
+                    f"TMDB: {done}/{total_to_fetch} processed "
+                    f"({pct:.0f}%) — {fetched} enriched, {skipped} not found"
+                )
+                last_progress = now
+
+        self._log.success(
+            f"TMDB: Complete — {fetched} enriched, {skipped} not found, "
+            f"{len(results)} total (incl. cached)"
+        )
         return results
 
     async def _cache_result(self, db_manager, info: TMDBMediaInfo) -> None:
