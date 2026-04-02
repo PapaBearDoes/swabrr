@@ -129,6 +129,8 @@ export default function DashboardPage() {
               <th onClick={() => handleSort('title')}>Title <SortIcon field="title" /></th>
               <th>Type</th>
               <th onClick={() => handleSort('keep_score')}>Score <SortIcon field="keep_score" /></th>
+              <th>Rarity</th>
+              <th>Cultural</th>
               <th onClick={() => handleSort('file_size')}>Size <SortIcon field="file_size" /></th>
               <th>Plays</th>
               <th>Viewers</th>
@@ -138,9 +140,9 @@ export default function DashboardPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>Loading...</td></tr>
+              <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>Loading...</td></tr>
             ) : scores.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>No scores yet. Run a scoring cycle to get started.</td></tr>
+              <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>No scores yet. Run a scoring cycle to get started.</td></tr>
             ) : scores.map((s: any) => (
               <tr key={s.tmdb_id}>
                 <td>
@@ -153,6 +155,8 @@ export default function DashboardPage() {
                     {formatScore(s.keep_score)}
                   </span>
                 </td>
+                <td><span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{formatScore(s.rarity_score)}</span></td>
+                <td><span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{formatScore(s.cultural_value_score)}</span></td>
                 <td>{formatBytes(s.file_size_bytes)}</td>
                 <td>{s.total_plays || 0}</td>
                 <td>{s.unique_viewers || 0}</td>

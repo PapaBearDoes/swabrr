@@ -130,6 +130,8 @@ export default function CandidatesPage() {
               <th>Type</th>
               <th>Score</th>
               <th>Size</th>
+              <th>Rarity</th>
+              <th>Cultural</th>
               <th>Watch Activity</th>
               <th>Request</th>
               <th>Action</th>
@@ -137,9 +139,9 @@ export default function CandidatesPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>Loading...</td></tr>
+              <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>Loading...</td></tr>
             ) : candidates.length === 0 ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
+              <tr><td colSpan={10} style={{ textAlign: 'center', padding: 40, color: 'var(--text-secondary)' }}>
                 <CheckCircle size={32} style={{ marginBottom: 8, opacity: 0.5 }} /><br />No removal candidates. Your library is in good shape!
               </td></tr>
             ) : candidates.map((c: any) => (
@@ -149,6 +151,8 @@ export default function CandidatesPage() {
                 <td><span style={{ fontSize: 12, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>{c.media_type}</span></td>
                 <td><span className="score-badge score-low">{formatScore(c.keep_score)}</span></td>
                 <td>{formatBytes(c.file_size_bytes)}</td>
+                <td><span style={{ fontSize: 13 }}>{formatScore(c.rarity_score || 0)}</span></td>
+                <td><span style={{ fontSize: 13 }}>{formatScore(c.cultural_value_score || 0)}</span></td>
                 <td><span style={{ fontSize: 13 }}>{formatScore(c.watch_activity_score || 0)}</span></td>
                 <td><span style={{ fontSize: 13 }}>{formatScore(c.request_score || 0)}</span></td>
                 <td>
