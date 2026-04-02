@@ -17,7 +17,7 @@
 | 4 | FastAPI Endpoints | ✅ Complete | Phase 3 |
 | 5 | Dashboard MVP | ✅ Complete | Phase 4 |
 | 6 | Scheduling & Notifications | 🔄 In Progress | Phase 4 |
-| 7 | TMDB Integration (Rarity & Cultural) | ⬜ Planned | Phase 3 |
+| 7 | TMDB Integration (Rarity & Cultural) | ✅ Complete | Phase 3 |
 | 8 | Removal Tracking & Reporting | ⬜ Planned | Phase 5 |
 
 **Note:** Phases 6, 7, and 8 can be worked in parallel once their dependencies are met.
@@ -592,13 +592,13 @@ data from TMDB's API.
 
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
-| 7.1 | `api/src/clients/tmdb_client.py` | ⬜ | TMDB API v3 integration |
-| 7.2 | Streaming availability lookup | ⬜ | TMDB's watch providers endpoint |
-| 7.3 | Cultural value data enrichment | ⬜ | Ratings, vote count, keywords, awards |
-| 7.4 | TVDB → TMDB resolution cache | ⬜ | `tvdb_tmdb_map` table for Sonarr lookups |
-| 7.5 | Rarity signal calculator update | ⬜ | Replace neutral 50/100 default with real data |
-| 7.6 | Cultural value signal calculator update | ⬜ | Use TMDB ratings instead of *arr metadata |
-| 7.7 | Dashboard: streaming availability display | ⬜ | Show which services have each title |
+| 7.1 | `api/src/clients/tmdb_client.py` | ✅ Complete | Full TMDB v3 client with rate limiting |
+| 7.2 | Streaming availability lookup | ✅ Complete | Watch providers endpoint, region-filtered |
+| 7.3 | Cultural value data enrichment | ✅ Complete | Ratings, vote count, genres |
+| 7.4 | TVDB → TMDB resolution cache | ✅ Complete | tvdb_tmdb_map table + TMDB find endpoint |
+| 7.5 | Rarity signal calculator update | ✅ Complete | Already wired — uses streaming_service_count |
+| 7.6 | Cultural value signal calculator update | ✅ Complete | Already wired — uses tmdb_rating/vote_count |
+| 7.7 | Dashboard: streaming availability display | ⬜ Planned | Post-MVP enhancement |
 
 ### Implementation Notes
 

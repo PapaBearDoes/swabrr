@@ -8,7 +8,7 @@ fetch data → merge into unified records → apply signal calculators →
 compute weighted scores → persist results to PostgreSQL.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
+FILE VERSION: v1.1.0
 LAST MODIFIED: 2026-04-01
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
@@ -26,6 +26,7 @@ from src.clients.radarr_client import RadarrClient
 from src.clients.sonarr_client import SonarrClient
 from src.clients.tautulli_client import TautulliClient
 from src.clients.seerr_client import SeerrClient
+from src.clients.tmdb_client import TMDBClient
 from src.scoring.models import (
     MediaRecord,
     ScoreBreakdown,
@@ -53,6 +54,7 @@ class ScoringEngine:
         sonarr_anime: SonarrClient | None,
         tautulli: TautulliClient | None,
         seerr: SeerrClient | None,
+        tmdb: TMDBClient | None,
         log: logging.Logger,
     ) -> None:
         self._db = db_manager
@@ -62,6 +64,7 @@ class ScoringEngine:
         self._sonarr_anime = sonarr_anime
         self._tautulli = tautulli
         self._seerr = seerr
+        self._tmdb = tmdb
         self._log = log
 
     # -----------------------------------------------------------------------
@@ -102,12 +105,31 @@ class ScoringEngine:
             if client:
                 series_list = await client.get_series()
                 for s in series_list:
-                    # Use tmdb_id if available, skip if not resolvable
+                    # Use tmdb_id if available, resolve via TMDB if not
                     tmdb_id = s.tmdb_id
+                    if not tmdb_id and s.tvdb_id and self._tmdb:
+                        # Check tvdb_tmdb_map cache first
+                        async with self._db.acquire() as conn:
+                            cached = await conn.fetchrow(
+                                "SELECT tmdb_id FROM tvdb_tmdb_map WHERE tvdb_id = $1",
+                                s.tvdb_id,
+                            )
+                        if cached:
+                            tmdb_id = cached["tmdb_id"]
+                        else:
+                            # Resolve via TMDB API
+                            resolved = await self._tmdb.resolve_tvdb_id(s.tvdb_id)
+                            if resolved:
+                                tmdb_id = resolved
+                                async with self._db.acquire() as conn:
+                                    await conn.execute(
+                                        "INSERT INTO tvdb_tmdb_map (tvdb_id, tmdb_id, title) "
+                                        "VALUES ($1, $2, $3) ON CONFLICT (tvdb_id) DO NOTHING",
+                                        s.tvdb_id, tmdb_id, s.title,
+                                    )
                     if not tmdb_id:
-                        # TODO Phase 7: TVDB→TMDB resolution via TMDB API
                         self._log.debug(
-                            f"Skipping {s.title} — no TMDB ID (TVDB: {s.tvdb_id})"
+                            f"Skipping {s.title} — could not resolve TMDB ID (TVDB: {s.tvdb_id})"
                         )
                         continue
                     records_by_tmdb[tmdb_id] = MediaRecord(
@@ -174,6 +196,28 @@ class ScoringEngine:
             )
         else:
             warnings.append("Seerr unavailable")
+
+        # --- TMDB: cultural value + streaming availability ---
+        if self._tmdb:
+            tmdb_ids = [
+                (r.tmdb_id, r.media_type) for r in records_by_tmdb.values()
+            ]
+            tmdb_data = await self._tmdb.batch_fetch(
+                tmdb_ids, db_manager=self._db
+            )
+            enriched = 0
+            for tmdb_id, info in tmdb_data.items():
+                record = records_by_tmdb.get(tmdb_id)
+                if record:
+                    record.tmdb_rating = info.vote_average
+                    record.tmdb_vote_count = info.vote_count
+                    record.streaming_service_count = info.streaming_service_count
+                    enriched += 1
+            self._log.info(
+                f"Enriched {enriched}/{len(records_by_tmdb)} titles with TMDB data"
+            )
+        else:
+            warnings.append("TMDB unavailable — using neutral rarity/cultural scores")
 
         records = list(records_by_tmdb.values())
         self._log.info(f"Total media records: {len(records)}")
@@ -441,6 +485,7 @@ def create_scoring_engine(
         sonarr_anime=clients.get("sonarr_anime"),
         tautulli=clients.get("tautulli"),
         seerr=clients.get("seerr"),
+        tmdb=clients.get("tmdb"),
         log=log,
     )
 

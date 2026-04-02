@@ -29,6 +29,7 @@ from src.clients.radarr_client import create_radarr_client
 from src.clients.sonarr_client import create_sonarr_client
 from src.clients.tautulli_client import create_tautulli_client
 from src.clients.seerr_client import create_seerr_client
+from src.clients.tmdb_client import create_tmdb_client
 from src.scoring.engine import create_scoring_engine
 from src.managers.scheduler_manager import create_scheduler_manager
 
@@ -111,6 +112,17 @@ async def lifespan(application: FastAPI):
             log=log_manager.get_logger("seerr_client"),
         )
         await clients["seerr"].health_check()
+
+    # TMDB (Phase 7)
+    try:
+        tmdb_key = _read_secret("/run/secrets/swabbarr_tmdb_api_key")
+        clients["tmdb"] = create_tmdb_client(
+            api_key=tmdb_key,
+            log=log_manager.get_logger("tmdb_client"),
+        )
+        await clients["tmdb"].health_check()
+    except RuntimeError:
+        log.info("TMDB API key not configured — scoring without streaming/cultural data")
 
     application.state.clients = clients
     log.success(f"API clients initialized: {list(clients.keys())}")

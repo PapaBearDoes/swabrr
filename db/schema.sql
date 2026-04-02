@@ -165,6 +165,29 @@ CREATE TABLE IF NOT EXISTS tvdb_tmdb_map (
 CREATE INDEX IF NOT EXISTS idx_tvdb_tmdb_map_tvdb ON tvdb_tmdb_map (tvdb_id);
 
 -- ----------------------------------------------------------------------------
+-- Table: tmdb_cache
+-- Cached TMDB data per title. Streaming availability refreshes every 7 days,
+-- cultural data (ratings, vote count) every 30 days.
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS tmdb_cache (
+    id                      SERIAL PRIMARY KEY,
+    tmdb_id                 INTEGER NOT NULL UNIQUE,
+    media_type              VARCHAR(10) NOT NULL CHECK (media_type IN ('movie', 'series')),
+    vote_average            NUMERIC(4,2),
+    vote_count              INTEGER DEFAULT 0,
+    streaming_services      TEXT,
+    streaming_service_count INTEGER DEFAULT 0,
+    streaming_region        VARCHAR(5) DEFAULT 'US',
+    genres                  TEXT,
+    release_date            VARCHAR(20),
+    fetched_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    streaming_expires_at    TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '7 days',
+    cultural_expires_at     TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '30 days'
+);
+
+CREATE INDEX IF NOT EXISTS idx_tmdb_cache_tmdb_id ON tmdb_cache (tmdb_id);
+
+-- ----------------------------------------------------------------------------
 -- Seed data: default scoring weights (single row)
 -- ----------------------------------------------------------------------------
 INSERT INTO scoring_weights (watch_activity, rarity, request_accountability, size_efficiency, cultural_value, candidate_threshold)
