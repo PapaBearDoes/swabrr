@@ -81,15 +81,15 @@ git clone https://github.com/PapaBearDoes/swabbarr.git
 cd swabbarr
 
 # Copy environment template and configure
-cp .env.template .env
+cp ./.env.template ./.env
 # Edit .env with your service URLs
 
 # Add API keys as Docker Secrets
-echo "your-tautulli-key" > api/secrets/swabbarr_tautulli_api_key
-echo "your-radarr-key"   > api/secrets/swabbarr_radarr_api_key
-echo "your-sonarr-key"   > api/secrets/swabbarr_sonarr_api_key
-echo "your-seerr-key"    > api/secrets/swabbarr_seerr_api_key
-echo "your-db-password"  > api/secrets/swabbarr_db_password
+printf "your-tautulli-key" > api/secrets/swabbarr_tautulli_api_key
+printf "your-radarr-key"   > api/secrets/swabbarr_radarr_api_key
+printf "your-sonarr-key"   > api/secrets/swabbarr_sonarr_api_key
+printf "your-seerr-key"    > api/secrets/swabbarr_seerr_api_key
+printf "your-db-password"  > api/secrets/swabbarr_db_password
 
 # Start the stack
 docker compose up -d
