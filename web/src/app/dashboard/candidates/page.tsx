@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getCandidates, markRemoved, batchMarkRemoved, exportCandidatesCSV } from '@/lib/api';
+import { getCandidates, markRemoved, batchMarkRemoved, exportCandidatesCSV, protectTitle } from '@/lib/api';
 import { formatBytes, formatScore } from '@/lib/utils';
-import { Trash2, CheckCircle, Download } from 'lucide-react';
+import { Trash2, CheckCircle, Download, Shield } from 'lucide-react';
 
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState<any[]>([]);
@@ -14,6 +14,7 @@ export default function CandidatesPage() {
   const [removing, setRemoving] = useState<number | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [batchRemoving, setBatchRemoving] = useState(false);
+  const [protecting, setProtecting] = useState<number | null>(null);
   const perPage = 50;
 
   const fetchData = useCallback(async () => {
@@ -57,6 +58,20 @@ export default function CandidatesPage() {
       setSelected(new Set());
     } catch (e) { console.error(e); }
     setBatchRemoving(false);
+  };
+
+  const handleProtect = async (tmdbId: number, title: string) => {
+    const reason = prompt(`Protect "${title}"?\n\nOptional: enter a reason (or leave blank):`);
+    if (reason === null) return; // User cancelled
+    setProtecting(tmdbId);
+    try {
+      await protectTitle(tmdbId, reason || undefined);
+      // Remove from candidates list since it's now protected
+      setCandidates(prev => prev.filter(c => c.tmdb_id !== tmdbId));
+      setTotal(prev => prev - 1);
+      setSelected(prev => { const s = new Set(prev); s.delete(tmdbId); return s; });
+    } catch (e) { console.error(e); }
+    setProtecting(null);
   };
 
   const toggleSelect = (tmdbId: number) => {
@@ -156,9 +171,14 @@ export default function CandidatesPage() {
                 <td><span style={{ fontSize: 13 }}>{formatScore(c.watch_activity_score || 0)}</span></td>
                 <td><span style={{ fontSize: 13 }}>{formatScore(c.request_score || 0)}</span></td>
                 <td>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleRemove(c.tmdb_id)} disabled={removing === c.tmdb_id}>
-                    <Trash2 size={14} /> {removing === c.tmdb_id ? '...' : 'Remove'}
-                  </button>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button className="btn btn-sm" onClick={() => handleProtect(c.tmdb_id, c.title)} disabled={protecting === c.tmdb_id} title="Protect this title">
+                      <Shield size={14} /> {protecting === c.tmdb_id ? '...' : 'Protect'}
+                    </button>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleRemove(c.tmdb_id)} disabled={removing === c.tmdb_id}>
+                      <Trash2 size={14} /> {removing === c.tmdb_id ? '...' : 'Remove'}
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
