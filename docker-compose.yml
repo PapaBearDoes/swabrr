@@ -6,7 +6,6 @@
 # ============================================================================
 
 services:
-
   # --------------------------------------------------------------------------
   # swabbarr-db — PostgreSQL 17
   # --------------------------------------------------------------------------
@@ -35,6 +34,7 @@ services:
   # swabbarr-api — FastAPI + Scoring Engine
   # --------------------------------------------------------------------------
   swabbarr-api:
+    image: ghcr.io/papabeardoes/swabbarr-api:latest
     build:
       context: ./api
       dockerfile: Dockerfile
@@ -69,6 +69,7 @@ services:
   # swabbarr-web — Next.js Dashboard
   # --------------------------------------------------------------------------
   swabbarr-web:
+    image: ghcr.io/papabeardoes/swabbarr-web:latest
     build:
       context: ./web
       dockerfile: Dockerfile
