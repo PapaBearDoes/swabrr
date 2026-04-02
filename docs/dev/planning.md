@@ -11,7 +11,7 @@
 | Phase | Description | Status | Dependencies |
 |-------|-------------|--------|-------------|
 | 0 | Standards & Scaffold | ✅ Complete | None |
-| 1 | Docker Compose, DB Schema, Secrets | ⬜ Planned | Phase 0 |
+| 1 | Docker Compose, DB Schema, Secrets | 🔄 In Progress | Phase 0 |
 | 2 | External API Clients | ⬜ Planned | Phase 1 |
 | 3 | Scoring Engine | ⬜ Planned | Phase 2 |
 | 4 | FastAPI Endpoints | ⬜ Planned | Phase 3 |
@@ -54,21 +54,21 @@
 
 **Goal:** Containerized infrastructure with a working database and secrets pattern.
 
-**Status:** ⬜ Planned
+**Status:** 🔄 In Progress
 
 ### Deliverables
 
 | # | Deliverable | Status | Notes |
 |---|-------------|--------|-------|
-| 1.1 | `docker-compose.yml` | ⬜ | swabbarr-api, swabbarr-db, swabbarr-web (stub) |
-| 1.2 | `api/Dockerfile` | ⬜ | Multi-stage, Python 3.13, tini, PUID/PGID |
-| 1.3 | `api/docker-entrypoint.py` | ⬜ | Pure Python entrypoint per Rule #12 |
-| 1.4 | `api/requirements.txt` | ⬜ | fastapi, uvicorn, httpx, asyncpg, apscheduler |
-| 1.5 | `api/secrets/README.md` | ⬜ | Documents expected secrets |
-| 1.6 | `db/schema.sql` | ⬜ | Full PostgreSQL schema (see below) |
-| 1.7 | `api/src/managers/db_manager.py` | ⬜ | Connection pool, acquire() pattern |
-| 1.8 | `api/src/managers/logging_config_manager.py` | ⬜ | Colorized logging per Rule #9 |
-| 1.9 | `api/src/main.py` | ⬜ | FastAPI app skeleton, lifespan, DB init |
+| 1.1 | `docker-compose.yml` | ✅ Complete | swabbarr-api, swabbarr-db, swabbarr-web (stub) |
+| 1.2 | `api/Dockerfile` | ✅ Complete | Multi-stage, Python 3.13, tini, PUID/PGID |
+| 1.3 | `api/docker-entrypoint.py` | ✅ Complete | Pure Python entrypoint per Rule #12 |
+| 1.4 | `api/requirements.txt` | ✅ Complete | fastapi, uvicorn, httpx, asyncpg, apscheduler |
+| 1.5 | `api/secrets/README.md` | ✅ Complete | Completed in Phase 0 |
+| 1.6 | `db/schema.sql` | ✅ Complete | 7 tables + triggers + seed data |
+| 1.7 | `api/src/managers/db_manager.py` | ✅ Complete | Connection pool, acquire() pattern |
+| 1.8 | `api/src/managers/logging_config_manager.py` | ✅ Complete | Colorized logging per Rule #9 |
+| 1.9 | `api/src/main.py` | ✅ Complete | FastAPI app skeleton, lifespan, DB init |
 
 ### Database Schema Design
 

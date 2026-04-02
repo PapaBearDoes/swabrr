@@ -1,0 +1,115 @@
+# ============================================================================
+# Swabbarr — Docker Compose
+# ============================================================================
+# FILE VERSION: v1.0.0
+# LAST MODIFIED: 2026-04-01
+# ============================================================================
+
+services:
+
+  # --------------------------------------------------------------------------
+  # swabbarr-db — PostgreSQL 17
+  # --------------------------------------------------------------------------
+  swabbarr-db:
+    image: postgres:17-alpine
+    container_name: swabbarr-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SWABBARR_DB_NAME:-swabbarr}
+      POSTGRES_USER: ${SWABBARR_DB_USER:-swabbarr}
+      POSTGRES_PASSWORD_FILE: /run/secrets/swabbarr_db_password
+    secrets:
+      - swabbarr_db_password
+    volumes:
+      - swabbarr-db-data:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SWABBARR_DB_USER:-swabbarr}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------------------------------------------------
+  # swabbarr-api — FastAPI + Scoring Engine
+  # --------------------------------------------------------------------------
+  swabbarr-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: swabbarr-api
+    restart: unless-stopped
+    depends_on:
+      swabbarr-db:
+        condition: service_healthy
+    environment:
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-America/Los_Angeles}
+      SWABBARR_LOG_LEVEL: ${SWABBARR_LOG_LEVEL:-INFO}
+      SWABBARR_LOG_FORMAT: ${SWABBARR_LOG_FORMAT:-human}
+      SWABBARR_DB_HOST: swabbarr-db
+      SWABBARR_DB_PORT: ${SWABBARR_DB_PORT:-5432}
+      SWABBARR_DB_NAME: ${SWABBARR_DB_NAME:-swabbarr}
+      SWABBARR_DB_USER: ${SWABBARR_DB_USER:-swabbarr}
+      SWABBARR_TAUTULLI_URL: ${SWABBARR_TAUTULLI_URL:-}
+      SWABBARR_RADARR_URL: ${SWABBARR_RADARR_URL:-}
+      SWABBARR_SONARR_URL: ${SWABBARR_SONARR_URL:-}
+      SWABBARR_SONARR_ANIME_URL: ${SWABBARR_SONARR_ANIME_URL:-}
+      SWABBARR_SEERR_URL: ${SWABBARR_SEERR_URL:-}
+      SWABBARR_TMDB_REGION: ${SWABBARR_TMDB_REGION:-US}
+      SWABBARR_SCORE_CRON: ${SWABBARR_SCORE_CRON:-0 3 * * 0}
+      SWABBARR_API_HOST: ${SWABBARR_API_HOST:-0.0.0.0}
+      SWABBARR_API_PORT: ${SWABBARR_API_PORT:-8484}
+      SWABBARR_HTTP_TIMEOUT: ${SWABBARR_HTTP_TIMEOUT:-30}
+      SWABBARR_HTTP_RETRIES: ${SWABBARR_HTTP_RETRIES:-3}
+    secrets:
+      - swabbarr_db_password
+      - swabbarr_tautulli_api_key
+      - swabbarr_radarr_api_key
+      - swabbarr_sonarr_api_key
+      - swabbarr_sonarr_anime_api_key
+      - swabbarr_seerr_api_key
+      - swabbarr_tmdb_api_key
+    ports:
+      - "${SWABBARR_API_PORT:-8484}:8484"
+
+  # --------------------------------------------------------------------------
+  # swabbarr-web — Next.js Dashboard (Phase 5)
+  # --------------------------------------------------------------------------
+  # swabbarr-web:
+  #   build:
+  #     context: ./web
+  #     dockerfile: Dockerfile
+  #   container_name: swabbarr-web
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - swabbarr-api
+  #   ports:
+  #     - "3000:3000"
+
+# ----------------------------------------------------------------------------
+# Secrets
+# ----------------------------------------------------------------------------
+secrets:
+  swabbarr_db_password:
+    file: ./api/secrets/swabbarr_db_password
+  swabbarr_tautulli_api_key:
+    file: ./api/secrets/swabbarr_tautulli_api_key
+  swabbarr_radarr_api_key:
+    file: ./api/secrets/swabbarr_radarr_api_key
+  swabbarr_sonarr_api_key:
+    file: ./api/secrets/swabbarr_sonarr_api_key
+  swabbarr_sonarr_anime_api_key:
+    file: ./api/secrets/swabbarr_sonarr_anime_api_key
+  swabbarr_seerr_api_key:
+    file: ./api/secrets/swabbarr_seerr_api_key
+  swabbarr_tmdb_api_key:
+    file: ./api/secrets/swabbarr_tmdb_api_key
+
+# ----------------------------------------------------------------------------
+# Volumes
+# ----------------------------------------------------------------------------
+volumes:
+  swabbarr-db-data:
