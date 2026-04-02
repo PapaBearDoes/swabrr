@@ -8,8 +8,8 @@ fetch data → merge into unified records → apply signal calculators →
 compute weighted scores → persist results to PostgreSQL.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.1.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.2.0
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -56,6 +56,7 @@ class ScoringEngine:
         seerr: SeerrClient | None,
         tmdb: TMDBClient | None,
         log: logging.Logger,
+        build_clients_fn=None,
     ) -> None:
         self._db = db_manager
         self._config = config_manager
@@ -66,6 +67,39 @@ class ScoringEngine:
         self._seerr = seerr
         self._tmdb = tmdb
         self._log = log
+        self._build_clients_fn = build_clients_fn
+
+    # -----------------------------------------------------------------------
+    # Client refresh — reload from DB settings before each run
+    # -----------------------------------------------------------------------
+    async def _refresh_clients(self) -> None:
+        """Rebuild API clients from current DB settings.
+
+        Ensures dashboard-configured services take effect without a restart.
+        Closes any existing clients before replacing them.
+        """
+        if not self._build_clients_fn:
+            return
+
+        # Close existing clients
+        for client in [
+            self._radarr, self._sonarr, self._sonarr_anime,
+            self._tautulli, self._seerr, self._tmdb,
+        ]:
+            if client:
+                try:
+                    await client.close()
+                except Exception:
+                    pass
+
+        clients = await self._build_clients_fn()
+        self._radarr = clients.get("radarr")
+        self._sonarr = clients.get("sonarr")
+        self._sonarr_anime = clients.get("sonarr_anime")
+        self._tautulli = clients.get("tautulli")
+        self._seerr = clients.get("seerr")
+        self._tmdb = clients.get("tmdb")
+        self._log.info(f"Refreshed clients: {list(clients.keys())}")
 
     # -----------------------------------------------------------------------
     # Step 1: Fetch data from all sources
@@ -375,6 +409,9 @@ class ScoringEngine:
         started_at = datetime.now(timezone.utc)
         self._log.info(f"Scoring run started (trigger: {trigger})")
 
+        # Refresh clients from DB settings (picks up dashboard changes)
+        await self._refresh_clients()
+
         # Create scoring_runs record
         async with self._db.acquire() as conn:
             row = await conn.fetchrow(
@@ -512,6 +549,7 @@ def create_scoring_engine(
     config_manager: ConfigManager,
     clients: dict,
     log: logging.Logger,
+    build_clients_fn=None,
 ) -> ScoringEngine:
     """Create a ScoringEngine with all dependencies injected."""
     return ScoringEngine(
@@ -524,6 +562,7 @@ def create_scoring_engine(
         seerr=clients.get("seerr"),
         tmdb=clients.get("tmdb"),
         log=log,
+        build_clients_fn=build_clients_fn,
     )
 
 

@@ -8,7 +8,7 @@ Manages application lifespan (startup/shutdown), database initialization,
 and router registration.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.4.0
+FILE VERSION: v1.5.0
 LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
@@ -67,40 +67,52 @@ async def lifespan(application: FastAPI):
     application.state.settings_manager = settings_manager
     log.success("Settings manager ready")
 
-    # API Clients — initialized from DB settings
-    clients = {}
-    try:
-        services = await settings_manager.get_all_services()
-        for svc in services:
-            if not svc.enabled or not svc.base_url or not svc.api_key:
-                continue
-            try:
-                if svc.service_name == "radarr":
-                    clients["radarr"] = create_radarr_client(
-                        svc.base_url, svc.api_key, log_manager.get_logger("radarr_client"))
-                elif svc.service_name == "sonarr":
-                    clients["sonarr"] = create_sonarr_client(
-                        svc.base_url, svc.api_key, log_manager.get_logger("sonarr_client"), arr_source="sonarr")
-                elif svc.service_name == "sonarr_anime":
-                    clients["sonarr_anime"] = create_sonarr_client(
-                        svc.base_url, svc.api_key, log_manager.get_logger("sonarr_anime_client"), arr_source="sonarr-anime")
-                elif svc.service_name == "tautulli":
-                    clients["tautulli"] = create_tautulli_client(
-                        svc.base_url, svc.api_key, log_manager.get_logger("tautulli_client"))
-                elif svc.service_name == "seerr":
-                    clients["seerr"] = create_seerr_client(
-                        svc.base_url, svc.api_key, log_manager.get_logger("seerr_client"))
-                elif svc.service_name == "tmdb":
-                    clients["tmdb"] = create_tmdb_client(
-                        svc.api_key, log_manager.get_logger("tmdb_client"))
-                await clients[svc.service_name].health_check()
-            except Exception as e:
-                log.warning(f"Failed to initialize {svc.service_name}: {e}")
-    except Exception as e:
-        log.warning(f"Could not load service settings from DB: {e}")
-        log.info("Services can be configured via the dashboard Settings page")
+    # API Clients — build from DB settings (also used for refresh before scoring)
+    async def build_clients_from_db() -> dict:
+        """Build API client instances from current DB service settings.
 
+        Called at startup and before each scoring run so that
+        dashboard-configured settings take effect without a restart.
+        """
+        built: dict = {}
+        try:
+            services = await settings_manager.get_all_services()
+            for svc in services:
+                # TMDB has no base_url — it's hardcoded in the client
+                requires_url = svc.service_name not in ("tmdb",)
+                if not svc.enabled or not svc.api_key:
+                    continue
+                if requires_url and not svc.base_url:
+                    continue
+                try:
+                    if svc.service_name == "radarr":
+                        built["radarr"] = create_radarr_client(
+                            svc.base_url, svc.api_key, log_manager.get_logger("radarr_client"))
+                    elif svc.service_name == "sonarr":
+                        built["sonarr"] = create_sonarr_client(
+                            svc.base_url, svc.api_key, log_manager.get_logger("sonarr_client"), arr_source="sonarr")
+                    elif svc.service_name == "sonarr_anime":
+                        built["sonarr_anime"] = create_sonarr_client(
+                            svc.base_url, svc.api_key, log_manager.get_logger("sonarr_anime_client"), arr_source="sonarr-anime")
+                    elif svc.service_name == "tautulli":
+                        built["tautulli"] = create_tautulli_client(
+                            svc.base_url, svc.api_key, log_manager.get_logger("tautulli_client"))
+                    elif svc.service_name == "seerr":
+                        built["seerr"] = create_seerr_client(
+                            svc.base_url, svc.api_key, log_manager.get_logger("seerr_client"))
+                    elif svc.service_name == "tmdb":
+                        built["tmdb"] = create_tmdb_client(
+                            svc.api_key, log_manager.get_logger("tmdb_client"))
+                except Exception as e:
+                    log.warning(f"Failed to initialize {svc.service_name}: {e}")
+        except Exception as e:
+            log.warning(f"Could not load service settings from DB: {e}")
+            log.info("Services can be configured via the dashboard Settings page")
+        return built
+
+    clients = await build_clients_from_db()
     application.state.clients = clients
+    application.state.build_clients = build_clients_from_db
     log.success(f"API clients initialized: {list(clients.keys())}")
 
     # Scoring engine (Phase 3)
@@ -115,6 +127,7 @@ async def lifespan(application: FastAPI):
         config_manager=config_manager,
         clients=clients,
         log=log_manager.get_logger("scoring_engine"),
+        build_clients_fn=build_clients_from_db,
     )
     application.state.scoring_engine = scoring_engine
     log.success("Scoring engine ready")
