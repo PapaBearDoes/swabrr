@@ -7,8 +7,8 @@ Signal calculators for the five scoring categories.
 Each function takes a MediaRecord and returns a score from 0–100.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -29,15 +29,21 @@ CLASSIC_YEAR_THRESHOLD = 2000
 RECENCY_HALF_LIFE_DAYS = 180  # 6 months — score halves every 6 months
 
 
-def _days_since(iso_timestamp: str | None) -> float | None:
-    """Calculate days elapsed since an ISO timestamp. Returns None if invalid."""
-    if not iso_timestamp:
+def _days_since(timestamp: str | int | None) -> float | None:
+    """Calculate days elapsed since a timestamp. Returns None if invalid.
+
+    Accepts ISO 8601 strings or Unix epoch integers/floats.
+    """
+    if timestamp is None:
         return None
     try:
-        dt = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
+        if isinstance(timestamp, (int, float)):
+            dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        else:
+            dt = datetime.fromisoformat(str(timestamp).replace("Z", "+00:00"))
         now = datetime.now(timezone.utc)
         return max(0, (now - dt).total_seconds() / 86400)
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OSError):
         return None
 
 
