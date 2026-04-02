@@ -8,8 +8,7 @@ on watch activity, request history, rarity, cultural value, and storage footprin
 then surfaces the best removal candidates through a web dashboard so you can make
 informed decisions about what to keep and what to toss.
 
-**The name:** "Swabbing the deck" — cleaning up what's cluttering the ship. Follows
-the *arr ecosystem naming convention (Radarr, Sonarr, Swabbarr).
+**The name:** "Swabbing the deck" — cleaning up what's cluttering the ship.
 
 **The rule:** Swabbarr recommends. A human decides. No auto-deletion. Ever.
 
@@ -72,8 +71,7 @@ All components run as Docker containers, orchestrated by `docker-compose.yml`.
 
 ## Quick Start
 
-> **Coming soon** — Swabbarr is in active development. See `docs/dev/planning.md`
-> for current phase status.
+> **Coming soon** — Swabbarr is in active development.
 
 ```bash
 # Clone the repo
@@ -84,12 +82,12 @@ cd swabbarr
 cp ./.env.template ./.env
 # Edit .env with your service URLs
 
-# Add API keys as Docker Secrets
-printf "your-tautulli-key" > api/secrets/swabbarr_tautulli_api_key
-printf "your-radarr-key"   > api/secrets/swabbarr_radarr_api_key
-printf "your-sonarr-key"   > api/secrets/swabbarr_sonarr_api_key
-printf "your-seerr-key"    > api/secrets/swabbarr_seerr_api_key
-printf "your-db-password"  > api/secrets/swabbarr_db_password
+# Add keys as Docker Secrets
+openssl rand -base64 24 | tr -d '\n' > api/secrets/swabbarr_db_password
+openssl rand -base64 36 | tr -d '\n' > api/secrets/swabbarr_encryption_key
+
+# Change permissions
+chmod 600 swabbarr_db_password swabbarr_encryption_key
 
 # Start the stack
 docker compose up -d
