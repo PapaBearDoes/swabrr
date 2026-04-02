@@ -7,8 +7,8 @@ Scores router — exposes score results, candidates, breakdowns, trends,
 and dashboard summary statistics.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabbarr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabbarr
@@ -171,7 +171,7 @@ async def list_candidates(
         if not latest_run:
             return {"scores": [], "total": 0, "page": page, "per_page": per_page}
 
-        conditions = ["ms.scoring_run_id = $1", "ms.is_candidate = TRUE"]
+        conditions = ["ms.scoring_run_id = $1", "ms.is_candidate = TRUE", "pt.id IS NULL"]
         params: list = [latest_run["id"]]
         idx = 2
 
@@ -187,7 +187,9 @@ async def list_candidates(
 
         count_row = await conn.fetchrow(
             f"SELECT COUNT(*) as total FROM media_scores ms "
-            f"JOIN media_items mi ON ms.media_item_id = mi.id WHERE {where}",
+            f"JOIN media_items mi ON ms.media_item_id = mi.id "
+            f"LEFT JOIN protected_titles pt ON pt.media_item_id = mi.id "
+            f"WHERE {where}",
             *params,
         )
 
@@ -202,6 +204,7 @@ async def list_candidates(
                    ms.cultural_value_score
             FROM media_scores ms
             JOIN media_items mi ON ms.media_item_id = mi.id
+            LEFT JOIN protected_titles pt ON pt.media_item_id = mi.id
             WHERE {where}
             ORDER BY {order_col} {order_dir}
             LIMIT ${idx} OFFSET ${idx + 1}
