@@ -98,6 +98,7 @@ async def create_db_manager(log: logging.Logger) -> DBManager:
             min_size=2,
             max_size=10,
             command_timeout=30,
+            ssl=False,
         )
     except Exception as e:
         log.critical(f"Failed to create database pool: {e}")
