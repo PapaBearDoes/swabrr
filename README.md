@@ -131,10 +131,4 @@ swabbarr/
 
 ---
 
-## License
-
-MIT
-
----
-
 *Built to keep the deck clean* 🏴‍☠️
