@@ -2,6 +2,10 @@
 # Swabbarr — Project-Specific
 # =============================================================================
 
+# Internal Standards
+standards/
+standards.bak/
+
 # Docker Secrets (sensitive API keys and passwords)
 api/secrets/*
 !api/secrets/README.md
