@@ -4,7 +4,6 @@
 
 # Internal Standards
 standards/
-standards.bak/
 
 # Docker Secrets (sensitive API keys and passwords)
 api/secrets/*
