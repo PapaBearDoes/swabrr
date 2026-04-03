@@ -14,7 +14,7 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* yarn.lock* ./
-RUN npm ci --ignore-scripts 2>/dev/null || npm install
+RUN npm ci --no-update-notifier --ignore-scripts 2>/dev/null || npm install --no-update-notifier
 
 # --------------------------------------------------------------------------
 # Stage 2: Build
