@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Tautulli API client. Fetches watch history, play counts, viewer data,
@@ -9,9 +9,9 @@ and completion percentages from Tautulli's API v2.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -24,6 +24,7 @@ from src.clients.base_client import BaseClient
 @dataclass
 class TautulliWatchRecord:
     """A single watch record from Tautulli history."""
+
     rating_key: str
     title: str
     year: int | None
@@ -39,6 +40,7 @@ class TautulliWatchRecord:
 @dataclass
 class TautulliMediaSummary:
     """Aggregated watch data for a single media item (movie or series)."""
+
     rating_key: str
     title: str
     year: int | None
@@ -116,24 +118,26 @@ class TautulliClient(BaseClient):
         records: list[TautulliWatchRecord] = []
         for item in data.get("data", []):
             try:
-                records.append(TautulliWatchRecord(
-                    rating_key=str(item.get("rating_key", "")),
-                    title=item.get("full_title", item.get("title", "Unknown")),
-                    year=item.get("year"),
-                    media_type=item.get("media_type", ""),
-                    user=item.get("user", "Unknown"),
-                    watched_status=float(item.get("watched_status", 0)),
-                    play_count=1,  # Each history row is one play
-                    last_played=item.get("started"),
-                    grandparent_title=item.get("grandparent_title"),
-                    grandparent_rating_key=str(
-                        item.get("grandparent_rating_key", "")
-                    ) if item.get("grandparent_rating_key") else None,
-                ))
-            except Exception as e:
-                self._log.warning(
-                    f"Tautulli: Skipping malformed history entry: {e}"
+                records.append(
+                    TautulliWatchRecord(
+                        rating_key=str(item.get("rating_key", "")),
+                        title=item.get("full_title", item.get("title", "Unknown")),
+                        year=item.get("year"),
+                        media_type=item.get("media_type", ""),
+                        user=item.get("user", "Unknown"),
+                        watched_status=float(item.get("watched_status", 0)),
+                        play_count=1,  # Each history row is one play
+                        last_played=item.get("started"),
+                        grandparent_title=item.get("grandparent_title"),
+                        grandparent_rating_key=str(
+                            item.get("grandparent_rating_key", "")
+                        )
+                        if item.get("grandparent_rating_key")
+                        else None,
+                    )
                 )
+            except Exception as e:
+                self._log.warning(f"Tautulli: Skipping malformed history entry: {e}")
                 continue
 
         self._log.info(f"Tautulli: Fetched {len(records)} watch records")
@@ -191,13 +195,10 @@ class TautulliClient(BaseClient):
             # Running average of completion percentage
             current_total = summary.avg_completion_pct * (summary.total_plays - 1)
             summary.avg_completion_pct = (
-                (current_total + record.watched_status * 100)
-                / summary.total_plays
-            )
+                current_total + record.watched_status * 100
+            ) / summary.total_plays
 
-        self._log.info(
-            f"Tautulli: Aggregated into {len(summaries)} media summaries"
-        )
+        self._log.info(f"Tautulli: Aggregated into {len(summaries)} media summaries")
         return summaries
 
 

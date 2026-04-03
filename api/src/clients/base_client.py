@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Base HTTP client with shared retry, timeout, and error handling logic.
@@ -9,9 +9,9 @@ All service-specific clients inherit from this class.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -36,9 +36,7 @@ class BaseClient:
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._log = log
-        self._timeout = timeout or float(
-            os.environ.get("SWABBARR_HTTP_TIMEOUT", "30")
-        )
+        self._timeout = timeout or float(os.environ.get("SWABBARR_HTTP_TIMEOUT", "30"))
         self._max_retries = max_retries or int(
             os.environ.get("SWABBARR_HTTP_RETRIES", "3")
         )
@@ -144,9 +142,7 @@ class BaseClient:
             response = await client.get("/")
             return response.status_code < 500
         except Exception as e:
-            self._log.warning(
-                f"{self.service_name}: Health check failed: {e}"
-            )
+            self._log.warning(f"{self.service_name}: Health check failed: {e}")
             return False
 
     async def close(self) -> None:

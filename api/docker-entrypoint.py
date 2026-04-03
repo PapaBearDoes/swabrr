@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Pure Python Docker entrypoint with PUID/PGID support.
@@ -10,9 +10,9 @@ directories, drops privileges, and execs the application process.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 

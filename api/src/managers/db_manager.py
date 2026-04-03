@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 PostgreSQL connection pool manager using asyncpg.
@@ -9,9 +9,9 @@ Provides the acquire() context manager pattern for all database access.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -77,13 +77,13 @@ async def create_db_manager(log: logging.Logger) -> DBManager:
     Reads connection parameters from environment variables and
     the database password from Docker Secrets.
     """
-    host = os.environ.get("SWABBARR_DB_HOST", "swabbarr-db")
+    host = os.environ.get("SWABBARR_DB_HOST", "swabrr-db")
     port = int(os.environ.get("SWABBARR_DB_PORT", "5432"))
-    database = os.environ.get("SWABBARR_DB_NAME", "swabbarr")
-    user = os.environ.get("SWABBARR_DB_USER", "swabbarr")
+    database = os.environ.get("SWABBARR_DB_NAME", "swabrr")
+    user = os.environ.get("SWABBARR_DB_USER", "swabrr")
 
     # Read password from Docker Secret
-    secret_path = "/run/secrets/swabbarr_db_password"
+    secret_path = "/run/secrets/swabrr_db_password"
     password = _read_secret(secret_path)
 
     log.info(f"Connecting to PostgreSQL at {host}:{port}/{database}")
@@ -104,7 +104,9 @@ async def create_db_manager(log: logging.Logger) -> DBManager:
         log.critical(f"Failed to create database pool: {e}")
         raise
 
-    log.success(f"Database pool created ({pool.get_min_size()}-{pool.get_max_size()} connections)")
+    log.success(
+        f"Database pool created ({pool.get_min_size()}-{pool.get_max_size()} connections)"
+    )
     return DBManager(pool=pool, log=log)
 
 

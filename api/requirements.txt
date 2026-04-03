@@ -1,9 +1,9 @@
 # =============================================================================
-# Swabbarr API — Python Dependencies
+# Swabrr API — Python Dependencies
 # =============================================================================
 # FILE VERSION: v1.0.0
 # LAST MODIFIED: 2026-04-01
-# COMPONENT: swabbarr-api
+# COMPONENT: swabrr-api
 # =============================================================================
 
 # Web framework

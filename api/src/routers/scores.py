@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Scores router — exposes score results, candidates, breakdowns, trends,
@@ -9,9 +9,9 @@ and dashboard summary statistics.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -27,7 +27,9 @@ router = APIRouter()
 async def list_scores(
     request: Request,
     media_type: str | None = Query(None, regex="^(movie|series)$"),
-    sort_by: str = Query("keep_score", regex="^(keep_score|file_size|title|last_watched)$"),
+    sort_by: str = Query(
+        "keep_score", regex="^(keep_score|file_size|title|last_watched)$"
+    ),
     sort_order: str = Query("asc", regex="^(asc|desc)$"),
     page: int = Query(1, ge=1),
     per_page: int = Query(50, ge=1, le=200),
@@ -172,7 +174,11 @@ async def list_candidates(
         if not latest_run:
             return {"scores": [], "total": 0, "page": page, "per_page": per_page}
 
-        conditions = ["ms.scoring_run_id = $1", "ms.is_candidate = TRUE", "pt.id IS NULL"]
+        conditions = [
+            "ms.scoring_run_id = $1",
+            "ms.is_candidate = TRUE",
+            "pt.id IS NULL",
+        ]
         params: list = [latest_run["id"]]
         idx = 2
 
@@ -187,7 +193,11 @@ async def list_candidates(
             idx += 1
 
         where = " AND ".join(conditions)
-        sort_map = {"keep_score": "ms.keep_score", "file_size": "mi.file_size_bytes", "title": "mi.title"}
+        sort_map = {
+            "keep_score": "ms.keep_score",
+            "file_size": "mi.file_size_bytes",
+            "title": "mi.title",
+        }
         order_col = sort_map.get(sort_by, "ms.keep_score")
         order_dir = "ASC" if sort_order == "asc" else "DESC"
 
@@ -251,7 +261,9 @@ async def score_summary(request: Request):
 
     return {
         "has_scores": True,
-        "last_run_at": latest_run["completed_at"].isoformat() if latest_run["completed_at"] else None,
+        "last_run_at": latest_run["completed_at"].isoformat()
+        if latest_run["completed_at"]
+        else None,
         "last_run_trigger": latest_run["trigger"],
         "titles_scored": latest_run["titles_scored"],
         "candidates_flagged": latest_run["candidates_flagged"],
@@ -321,7 +333,8 @@ async def score_history(
             ORDER BY sr.started_at DESC
             LIMIT $2
             """,
-            tmdb_id, limit,
+            tmdb_id,
+            limit,
         )
     if not rows:
         raise HTTPException(status_code=404, detail="No score history found")

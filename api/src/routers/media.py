@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Media router — media details, protect/unprotect titles.
@@ -8,9 +8,9 @@ Media router — media details, protect/unprotect titles.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -22,6 +22,7 @@ router = APIRouter()
 
 class ProtectRequest(BaseModel):
     """Optional reason for protecting a title."""
+
     reason: str | None = None
 
 
@@ -41,11 +42,16 @@ async def get_media_detail(request: Request, tmdb_id: int):
             row["id"],
         )
 
-    return dict(row) | {"is_protected": protected is not None, "protect_reason": protected["reason"] if protected else None}
+    return dict(row) | {
+        "is_protected": protected is not None,
+        "protect_reason": protected["reason"] if protected else None,
+    }
 
 
 @router.post("/{tmdb_id}/protect")
-async def protect_title(request: Request, tmdb_id: int, body: ProtectRequest | None = None):
+async def protect_title(
+    request: Request, tmdb_id: int, body: ProtectRequest | None = None
+):
     """Add a title to the protected list."""
     db = request.app.state.db_manager
     async with db.acquire() as conn:
@@ -62,7 +68,8 @@ async def protect_title(request: Request, tmdb_id: int, body: ProtectRequest | N
             VALUES ($1, $2)
             ON CONFLICT (media_item_id) DO UPDATE SET reason = $2
             """,
-            item["id"], reason,
+            item["id"],
+            reason,
         )
     return {"status": "protected", "tmdb_id": tmdb_id}
 

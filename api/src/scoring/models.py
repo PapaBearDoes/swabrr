@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Pydantic and dataclass models for the scoring engine.
@@ -10,9 +10,9 @@ plus score result models.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -26,6 +26,7 @@ class MediaRecord:
 
     This is the input to the scoring engine — one record per TMDB ID.
     """
+
     # Identity (from Radarr/Sonarr)
     tmdb_id: int
     title: str
@@ -62,6 +63,7 @@ class MediaRecord:
 @dataclass
 class ScoreBreakdown:
     """Score result for a single media title with full breakdown."""
+
     tmdb_id: int
     keep_score: float
     watch_activity_score: float
@@ -78,6 +80,7 @@ class ScoreBreakdown:
 @dataclass
 class ScoringWeights:
     """User-configurable scoring weights from the database."""
+
     watch_activity: float = 40.0
     rarity: float = 20.0
     request_accountability: float = 15.0
@@ -89,6 +92,7 @@ class ScoringWeights:
 @dataclass
 class ScoringRunResult:
     """Summary of a completed scoring run."""
+
     run_id: int
     started_at: datetime
     completed_at: datetime | None = None

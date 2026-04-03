@@ -1,13 +1,13 @@
 # ============================================================================
-# Swabbarr — GitHub Actions Workflow
+# Swabrr — GitHub Actions Workflow
 # ============================================================================
 # FILE VERSION: v1.0.0
-# Repository: https://github.com/PapaBearDoes/swabbarr
+# Repository: https://github.com/PapaBearDoes/swabrr
 # ============================================================================
 #
-# Builds and pushes Swabbarr Docker images to GHCR:
-#   - swabbarr-api  (Python / FastAPI + scoring engine)
-#   - swabbarr-web  (Node / Next.js dashboard)
+# Builds and pushes Swabrr Docker images to GHCR:
+#   - swabrr-api  (Python / FastAPI + scoring engine)
+#   - swabrr-web  (Node / Next.js dashboard)
 #
 # On main branch: after all images are built, deploys to the K8s cluster
 # on Lofn via SSH → kubectl rolling update.
@@ -28,7 +28,7 @@
 #
 #   Option B (K8s on Lofn):
 #     kubectl create secret docker-registry ghcr-pull-secret \
-#       --namespace=swabbarr \
+#       --namespace=swabrr \
 #       --docker-server=ghcr.io \
 #       --docker-username=PapaBearDoes \
 #       --docker-password=<PAT with read:packages>
@@ -39,11 +39,11 @@
 #
 # ============================================================================
 
-name: Build and Push Swabbarr Images
+name: Build and Push Swabrr Images
 
 on:
   push:
-    branches: [main, 'dev/**', 'feature/**']
+    branches: [main, "dev/**", "feature/**"]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -63,10 +63,10 @@ jobs:
       matrix:
         include:
           - component: api
-            image: ghcr.io/papabeardoes/swabbarr-api
+            image: ghcr.io/papabeardoes/swabrr-api
             context: ./api
           - component: web
-            image: ghcr.io/papabeardoes/swabbarr-web
+            image: ghcr.io/papabeardoes/swabrr-web
             context: ./web
 
     steps:
@@ -180,23 +180,23 @@ jobs:
   #         ssh lofn << DEPLOY_SCRIPT
   #           set -euo pipefail
   #           export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-  #           echo "🚀 Deploying Swabbarr images (SHA: $SHA_SHORT)"
+  #           echo "🚀 Deploying Swabrr images (SHA: $SHA_SHORT)"
   #
-  #           kubectl set image deployment/swabbarr-api -n swabbarr \
-  #             swabbarr-api=ghcr.io/papabeardoes/swabbarr-api:latest
-  #           kubectl set image deployment/swabbarr-web -n swabbarr \
-  #             swabbarr-web=ghcr.io/papabeardoes/swabbarr-web:latest
+  #           kubectl set image deployment/swabrr-api -n swabrr \
+  #             swabrr-api=ghcr.io/papabeardoes/swabrr-api:latest
+  #           kubectl set image deployment/swabrr-web -n swabrr \
+  #             swabrr-web=ghcr.io/papabeardoes/swabrr-web:latest
   #
-  #           kubectl annotate deployment/swabbarr-api -n swabbarr \
-  #             swabbarr/deploy-sha="${DEPLOY_SHA}" --overwrite
-  #           kubectl annotate deployment/swabbarr-web -n swabbarr \
-  #             swabbarr/deploy-sha="${DEPLOY_SHA}" --overwrite
+  #           kubectl annotate deployment/swabrr-api -n swabrr \
+  #             swabrr/deploy-sha="${DEPLOY_SHA}" --overwrite
+  #           kubectl annotate deployment/swabrr-web -n swabrr \
+  #             swabrr/deploy-sha="${DEPLOY_SHA}" --overwrite
   #
-  #           echo "⏳ Waiting for swabbarr-api rollout..."
-  #           kubectl rollout status deployment/swabbarr-api -n swabbarr --timeout=300s
+  #           echo "⏳ Waiting for swabrr-api rollout..."
+  #           kubectl rollout status deployment/swabrr-api -n swabrr --timeout=300s
   #
-  #           echo "⏳ Waiting for swabbarr-web rollout..."
-  #           kubectl rollout status deployment/swabbarr-web -n swabbarr --timeout=300s
+  #           echo "⏳ Waiting for swabrr-web rollout..."
+  #           kubectl rollout status deployment/swabrr-web -n swabrr --timeout=300s
   #
   #           echo "✅ All deployments rolled out successfully"
   #         DEPLOY_SCRIPT
@@ -210,5 +210,5 @@ jobs:
   #         echo "" >> $GITHUB_STEP_SUMMARY
   #         echo "| Deployment | Status |" >> $GITHUB_STEP_SUMMARY
   #         echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
-  #         echo "| swabbarr-api | ✅ Rolled out |" >> $GITHUB_STEP_SUMMARY
-  #         echo "| swabbarr-web | ✅ Rolled out |" >> $GITHUB_STEP_SUMMARY
+  #         echo "| swabrr-api | ✅ Rolled out |" >> $GITHUB_STEP_SUMMARY
+  #         echo "| swabrr-web | ✅ Rolled out |" >> $GITHUB_STEP_SUMMARY

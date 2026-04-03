@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 FastAPI application entry point.
@@ -10,9 +10,9 @@ and router registration.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.5.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -38,7 +38,7 @@ from src.managers.scheduler_manager import create_scheduler_manager
 # ---------------------------------------------------------------------------
 # Logging (initialized immediately — Rule #9)
 # ---------------------------------------------------------------------------
-log_manager = create_logging_config_manager(component="swabbarr-api")
+log_manager = create_logging_config_manager(component="swabrr-api")
 log = log_manager.get_logger("main")
 
 
@@ -50,7 +50,7 @@ async def lifespan(application: FastAPI):
     """Manage startup and shutdown of shared resources."""
 
     # --- Startup ---
-    log.info("Swabbarr API starting up")
+    log.info("Swabrr API starting up")
 
     # Database
     db_manager = await create_db_manager(
@@ -92,22 +92,40 @@ async def lifespan(application: FastAPI):
                 try:
                     if svc.service_name == "radarr":
                         built["radarr"] = create_radarr_client(
-                            svc.base_url, svc.api_key, log_manager.get_logger("radarr_client"))
+                            svc.base_url,
+                            svc.api_key,
+                            log_manager.get_logger("radarr_client"),
+                        )
                     elif svc.service_name == "sonarr":
                         built["sonarr"] = create_sonarr_client(
-                            svc.base_url, svc.api_key, log_manager.get_logger("sonarr_client"), arr_source="sonarr")
+                            svc.base_url,
+                            svc.api_key,
+                            log_manager.get_logger("sonarr_client"),
+                            arr_source="sonarr",
+                        )
                     elif svc.service_name == "sonarr_anime":
                         built["sonarr_anime"] = create_sonarr_client(
-                            svc.base_url, svc.api_key, log_manager.get_logger("sonarr_anime_client"), arr_source="sonarr-anime")
+                            svc.base_url,
+                            svc.api_key,
+                            log_manager.get_logger("sonarr_anime_client"),
+                            arr_source="sonarr-anime",
+                        )
                     elif svc.service_name == "tautulli":
                         built["tautulli"] = create_tautulli_client(
-                            svc.base_url, svc.api_key, log_manager.get_logger("tautulli_client"))
+                            svc.base_url,
+                            svc.api_key,
+                            log_manager.get_logger("tautulli_client"),
+                        )
                     elif svc.service_name == "seerr":
                         built["seerr"] = create_seerr_client(
-                            svc.base_url, svc.api_key, log_manager.get_logger("seerr_client"))
+                            svc.base_url,
+                            svc.api_key,
+                            log_manager.get_logger("seerr_client"),
+                        )
                     elif svc.service_name == "tmdb":
                         built["tmdb"] = create_tmdb_client(
-                            svc.api_key, log_manager.get_logger("tmdb_client"))
+                            svc.api_key, log_manager.get_logger("tmdb_client")
+                        )
                 except Exception as e:
                     log.warning(f"Failed to initialize {svc.service_name}: {e}")
         except Exception as e:
@@ -145,24 +163,24 @@ async def lifespan(application: FastAPI):
     scheduler.start()
     application.state.scheduler = scheduler
 
-    log.success("Swabbarr API startup complete")
+    log.success("Swabrr API startup complete")
 
     yield
 
     # --- Shutdown ---
-    log.info("Swabbarr API shutting down")
+    log.info("Swabrr API shutting down")
     application.state.scheduler.stop()
     for name, client in application.state.clients.items():
         await client.close()
     await db_manager.close()
-    log.info("Swabbarr API shutdown complete")
+    log.info("Swabrr API shutdown complete")
 
 
 # ---------------------------------------------------------------------------
 # FastAPI application
 # ---------------------------------------------------------------------------
 app = FastAPI(
-    title="Swabbarr",
+    title="Swabrr",
     description="Media Library Pruning Engine",
     version="0.1.0",
     lifespan=lifespan,
@@ -172,8 +190,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",     # Next.js dev server
-        "http://localhost:8484",     # API dev
+        "http://localhost:3000",  # Next.js dev server
+        "http://localhost:8484",  # API dev
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Configuration manager for scoring weights and application settings.
@@ -9,9 +9,9 @@ Reads from and writes to PostgreSQL via DBManager.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -53,8 +53,10 @@ class ConfigManager:
         Returns True on success, False on validation failure.
         """
         total = (
-            weights.watch_activity + weights.rarity
-            + weights.request_accountability + weights.size_efficiency
+            weights.watch_activity
+            + weights.rarity
+            + weights.request_accountability
+            + weights.size_efficiency
             + weights.cultural_value
         )
         if abs(total - 100.0) > 0.01:

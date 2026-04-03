@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Signal calculators for the five scoring categories.
@@ -9,9 +9,9 @@ Each function takes a MediaRecord and returns a score from 0–100.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -105,7 +105,7 @@ def calc_rarity(record: MediaRecord) -> float:
 
     count = record.streaming_service_count
     if count >= 4:
-        return 15.0   # Very replaceable
+        return 15.0  # Very replaceable
     elif count == 3:
         return 25.0
     elif count == 2:
@@ -113,7 +113,7 @@ def calc_rarity(record: MediaRecord) -> float:
     elif count == 1:
         return 60.0
     else:
-        return 90.0   # Not on any streaming service — rare
+        return 90.0  # Not on any streaming service — rare
 
 
 # ---------------------------------------------------------------------------

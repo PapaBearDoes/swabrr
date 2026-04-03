@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Scheduler manager using APScheduler. Runs scoring jobs on a cron schedule
@@ -9,9 +9,9 @@ inside the FastAPI process. Provides next-run info and schedule management.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -24,7 +24,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from src.scoring.engine import ScoringEngine
 
-SCORING_JOB_ID = "swabbarr_scoring_run"
+SCORING_JOB_ID = "swabrr_scoring_run"
 
 
 class SchedulerManager:
@@ -59,14 +59,13 @@ class SchedulerManager:
             self._run_scoring,
             trigger=trigger,
             id=SCORING_JOB_ID,
-            name="Swabbarr Scoring Run",
+            name="Swabrr Scoring Run",
             replace_existing=True,
         )
         self._scheduler.start()
         next_run = self.get_next_run()
         self._log.success(
-            f"Scheduler started — cron: {self._cron_expr}, "
-            f"next run: {next_run}"
+            f"Scheduler started — cron: {self._cron_expr}, next run: {next_run}"
         )
 
     def stop(self) -> None:
@@ -104,9 +103,7 @@ class SchedulerManager:
             trigger=trigger,
         )
         next_run = self.get_next_run()
-        self._log.success(
-            f"Schedule updated — cron: {cron_expr}, next run: {next_run}"
-        )
+        self._log.success(f"Schedule updated — cron: {cron_expr}, next run: {next_run}")
         return True
 
     @staticmethod

@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Radarr API client. Fetches movie metadata, file sizes, quality profiles,
@@ -9,9 +9,9 @@ and TMDB IDs for all movies in the library.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -24,6 +24,7 @@ from src.clients.base_client import BaseClient
 @dataclass
 class RadarrMovie:
     """Structured movie data from Radarr."""
+
     radarr_id: int
     tmdb_id: int
     title: str
@@ -84,20 +85,20 @@ class RadarrClient(BaseClient):
                     q = movie_file["quality"].get("quality", {})
                     quality = q.get("name")
 
-                movies.append(RadarrMovie(
-                    radarr_id=item.get("id", 0),
-                    tmdb_id=tmdb_id,
-                    title=item.get("title", "Unknown"),
-                    year=item.get("year"),
-                    file_size_bytes=item.get("sizeOnDisk", 0),
-                    quality_profile=quality,
-                    added_at=item.get("added"),
-                    has_file=item.get("hasFile", False),
-                ))
-            except Exception as e:
-                self._log.warning(
-                    f"Radarr: Skipping malformed movie entry: {e}"
+                movies.append(
+                    RadarrMovie(
+                        radarr_id=item.get("id", 0),
+                        tmdb_id=tmdb_id,
+                        title=item.get("title", "Unknown"),
+                        year=item.get("year"),
+                        file_size_bytes=item.get("sizeOnDisk", 0),
+                        quality_profile=quality,
+                        added_at=item.get("added"),
+                        has_file=item.get("hasFile", False),
+                    )
                 )
+            except Exception as e:
+                self._log.warning(f"Radarr: Skipping malformed movie entry: {e}")
                 continue
 
         self._log.info(f"Radarr: Fetched {len(movies)} movies")

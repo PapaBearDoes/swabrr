@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 TMDB API client. Fetches streaming availability (watch providers),
@@ -9,9 +9,9 @@ ratings, vote counts, and resolves TVDB IDs to TMDB IDs.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.1.0
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -27,6 +27,7 @@ from src.clients.base_client import BaseClient
 @dataclass
 class TMDBMediaInfo:
     """Enriched media data from TMDB."""
+
     tmdb_id: int
     media_type: str  # 'movie' or 'series'
     vote_average: float | None = None
@@ -203,11 +204,19 @@ class TMDBClient(BaseClient):
                         results[tmdb_id] = TMDBMediaInfo(
                             tmdb_id=tmdb_id,
                             media_type=row["media_type"],
-                            vote_average=float(row["vote_average"]) if row["vote_average"] else None,
+                            vote_average=float(row["vote_average"])
+                            if row["vote_average"]
+                            else None,
                             vote_count=row["vote_count"],
-                            streaming_services=(row["streaming_services"] or "").split(",") if row["streaming_services"] else [],
+                            streaming_services=(row["streaming_services"] or "").split(
+                                ","
+                            )
+                            if row["streaming_services"]
+                            else [],
                             streaming_service_count=row["streaming_service_count"],
-                            genres=(row["genres"] or "").split(",") if row["genres"] else [],
+                            genres=(row["genres"] or "").split(",")
+                            if row["genres"]
+                            else [],
                             release_date=row.get("release_date"),
                         )
                     else:
@@ -217,9 +226,7 @@ class TMDBClient(BaseClient):
 
         # Fetch uncached titles from TMDB API
         total_to_fetch = len(to_fetch)
-        self._log.info(
-            f"TMDB: {len(results)} cached, {total_to_fetch} to fetch"
-        )
+        self._log.info(f"TMDB: {len(results)} cached, {total_to_fetch} to fetch")
 
         fetched = 0
         skipped = 0
@@ -275,10 +282,15 @@ class TMDBClient(BaseClient):
                         streaming_expires_at = NOW() + INTERVAL '7 days',
                         cultural_expires_at = NOW() + INTERVAL '30 days'
                     """,
-                    info.tmdb_id, info.media_type, info.vote_average,
-                    info.vote_count, ",".join(info.streaming_services),
-                    info.streaming_service_count, self._region,
-                    ",".join(info.genres), info.release_date,
+                    info.tmdb_id,
+                    info.media_type,
+                    info.vote_average,
+                    info.vote_count,
+                    ",".join(info.streaming_services),
+                    info.streaming_service_count,
+                    self._region,
+                    ",".join(info.genres),
+                    info.release_date,
                 )
         except Exception as e:
             self._log.warning(f"TMDB: Failed to cache result for {info.tmdb_id}: {e}")

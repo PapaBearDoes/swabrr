@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Colorized logging manager with custom SUCCESS level.
@@ -9,9 +9,9 @@ Provides consistent, human-readable log output across all components.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -40,20 +40,20 @@ logging.Logger.success = _success
 # ---------------------------------------------------------------------------
 COLORS = {
     "CRITICAL": "\033[1;91m",  # Bright Red (Bold)
-    "ERROR":    "\033[91m",     # Red
-    "WARNING":  "\033[93m",     # Yellow
-    "SUCCESS":  "\033[92m",     # Green
-    "INFO":     "\033[96m",     # Cyan
-    "DEBUG":    "\033[90m",     # Gray
+    "ERROR": "\033[91m",  # Red
+    "WARNING": "\033[93m",  # Yellow
+    "SUCCESS": "\033[92m",  # Green
+    "INFO": "\033[96m",  # Cyan
+    "DEBUG": "\033[90m",  # Gray
 }
 
 SYMBOLS = {
     "CRITICAL": "🚨",
-    "ERROR":    "❌",
-    "WARNING":  "⚠️",
-    "SUCCESS":  "✅",
-    "INFO":     "ℹ️",
-    "DEBUG":    "🔍",
+    "ERROR": "❌",
+    "WARNING": "⚠️",
+    "SUCCESS": "✅",
+    "INFO": "ℹ️",
+    "DEBUG": "🔍",
 }
 
 RESET = "\033[0m"
@@ -81,19 +81,16 @@ class ColorizedFormatter(logging.Formatter):
                 f"{color}[{timestamp}] {level:<8} | {name:<35} | "
                 f"{symbol} {record.getMessage()}{RESET}"
             )
-        return (
-            f"[{timestamp}] {level:<8} | {name:<35} | "
-            f"{symbol} {record.getMessage()}"
-        )
+        return f"[{timestamp}] {level:<8} | {name:<35} | {symbol} {record.getMessage()}"
 
 
 # ---------------------------------------------------------------------------
 # Manager class
 # ---------------------------------------------------------------------------
 class LoggingConfigManager:
-    """Manages logging configuration for all Swabbarr components."""
+    """Manages logging configuration for all Swabrr components."""
 
-    def __init__(self, component: str = "swabbarr-api") -> None:
+    def __init__(self, component: str = "swabrr-api") -> None:
         self._component = component
         self._level = self._resolve_level()
         self._use_color = self._detect_color_support()
@@ -124,10 +121,17 @@ class LoggingConfigManager:
 
     def _silence_noisy_libraries(self) -> None:
         noisy = [
-            "httpx", "httpcore", "uvicorn", "uvicorn.error",
-            "uvicorn.access", "asyncpg", "fastapi",
-            "apscheduler", "apscheduler.scheduler",
-            "apscheduler.executors", "watchfiles",
+            "httpx",
+            "httpcore",
+            "uvicorn",
+            "uvicorn.error",
+            "uvicorn.access",
+            "asyncpg",
+            "fastapi",
+            "apscheduler",
+            "apscheduler.scheduler",
+            "apscheduler.executors",
+            "watchfiles",
         ]
         for lib in noisy:
             logging.getLogger(lib).setLevel(logging.WARNING)
@@ -141,7 +145,7 @@ class LoggingConfigManager:
 # Factory function (Rule #1: NEVER call constructor directly)
 # ---------------------------------------------------------------------------
 def create_logging_config_manager(
-    component: str = "swabbarr-api",
+    component: str = "swabrr-api",
 ) -> LoggingConfigManager:
     """Create and return a configured LoggingConfigManager."""
     return LoggingConfigManager(component=component)

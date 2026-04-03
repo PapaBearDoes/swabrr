@@ -1,17 +1,17 @@
-# Swabbarr — Docker Secrets
+# Swabrr — Docker Secrets
 
-This directory holds Docker Secret files for the swabbarr-api container.
+This directory holds Docker Secret files for the swabrr-api container.
 **All files in this directory (except this README) are gitignored.**
 
 ## Required Secrets
 
 | Filename | Purpose |
 |----------|---------|
-| `swabbarr_db_password` | PostgreSQL password |
-| `swabbarr_encryption_key` | Encryption passphrase for API keys stored in the DB |
+| `swabrr_db_password` | PostgreSQL password |
+| `swabrr_encryption_key` | Encryption passphrase for API keys stored in the DB |
 
 **All other API keys** (Tautulli, Radarr, Sonarr, Seerr, TMDB) are configured
-through the Swabbarr dashboard Settings page and stored encrypted in PostgreSQL.
+through the Swabrr dashboard Settings page and stored encrypted in PostgreSQL.
 No individual API key secret files are needed.
 
 ## Setup
@@ -20,19 +20,19 @@ Create each file with the secret value as plain text:
 
 ```bash
 # Database password
-echo -n "your-db-password" > swabbarr_db_password
+echo -n "your-db-password" > swabrr_db_password
 
 # Encryption key (generate a strong random key)
-openssl rand -base64 32 > swabbarr_encryption_key
+openssl rand -base64 32 > swabrr_encryption_key
 ```
 
 Or on Windows (PowerShell):
 
 ```powershell
-Set-Content -NoNewline -Path "swabbarr_db_password" -Value "your-db-password"
+Set-Content -NoNewline -Path "swabrr_db_password" -Value "your-db-password"
 
 # For the encryption key, use any strong passphrase or random string
-Set-Content -NoNewline -Path "swabbarr_encryption_key" -Value "your-strong-passphrase-here"
+Set-Content -NoNewline -Path "swabrr_encryption_key" -Value "your-strong-passphrase-here"
 ```
 
 ## After Setup

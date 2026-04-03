@@ -1,5 +1,5 @@
 # =============================================================================
-# Swabbarr — Project-Specific
+# Swabrr — Project-Specific
 # =============================================================================
 
 # Internal Standards
@@ -13,7 +13,7 @@ api/secrets/*
 # Environment file (non-sensitive but not committed)
 .env
 
-# Node.js (swabbarr-web)
+# Node.js (swabrr-web)
 node_modules/
 .next/
 out/
@@ -22,7 +22,7 @@ web/.next/
 web/node_modules/
 
 # =============================================================================
-# Python (swabbarr-api)
+# Python (swabrr-api)
 # =============================================================================
 
 # Byte-compiled / optimized / DLL files

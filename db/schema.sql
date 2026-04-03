@@ -1,13 +1,13 @@
 -- ============================================================================
--- Swabbarr — Media Library Pruning Engine
+-- Swabrr — Media Library Pruning Engine
 -- ============================================================================
 --
--- Full PostgreSQL schema for Swabbarr.
--- Apply with: psql -U swabbarr -d swabbarr -f schema.sql
+-- Full PostgreSQL schema for Swabrr.
+-- Apply with: psql -U swabrr -d swabrr -f schema.sql
 --
 -- FILE VERSION: v1.0.0
 -- LAST MODIFIED: 2026-04-01
--- COMPONENT: swabbarr-db
+-- COMPONENT: swabrr-db
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------

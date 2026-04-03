@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Health router — overall health and per-service status checks.
@@ -8,9 +8,9 @@ Health router — overall health and per-service status checks.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -33,7 +33,7 @@ async def health_check(request: Request):
     status = "healthy" if db_healthy else "degraded"
     return {
         "status": status,
-        "service": "swabbarr-api",
+        "service": "swabrr-api",
         "version": "0.1.0",
         "database": "connected" if db_healthy else "disconnected",
     }

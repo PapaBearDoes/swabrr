@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Seerr (Overseerr/Jellyseerr) API client. Fetches media request history,
@@ -9,9 +9,9 @@ requestor identity, and request dates. Maps directly to TMDB IDs.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -24,6 +24,7 @@ from src.clients.base_client import BaseClient
 @dataclass
 class SeerrRequest:
     """A single media request from Seerr."""
+
     request_id: int
     tmdb_id: int
     media_type: str  # 'movie' or 'tv'
@@ -113,19 +114,19 @@ class SeerrClient(BaseClient):
                     }
                     status = status_map.get(status_code, "unknown")
 
-                    all_requests.append(SeerrRequest(
-                        request_id=item.get("id", 0),
-                        tmdb_id=tmdb_id,
-                        media_type=media_type,
-                        title=media.get("title") or media.get("name"),
-                        requested_by=requested_by,
-                        requested_at=item.get("createdAt"),
-                        status=status,
-                    ))
-                except Exception as e:
-                    self._log.warning(
-                        f"Seerr: Skipping malformed request entry: {e}"
+                    all_requests.append(
+                        SeerrRequest(
+                            request_id=item.get("id", 0),
+                            tmdb_id=tmdb_id,
+                            media_type=media_type,
+                            title=media.get("title") or media.get("name"),
+                            requested_by=requested_by,
+                            requested_at=item.get("createdAt"),
+                            status=status,
+                        )
                     )
+                except Exception as e:
+                    self._log.warning(f"Seerr: Skipping malformed request entry: {e}")
                     continue
 
             # Check if there are more pages

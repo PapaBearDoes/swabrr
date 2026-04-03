@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Settings manager for external service configuration (URLs and API keys).
@@ -10,9 +10,9 @@ is the only Docker Secret required.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -26,6 +26,7 @@ from src.managers.db_manager import DBManager
 @dataclass
 class ServiceConfig:
     """Configuration for a single external service."""
+
     service_name: str
     display_name: str
     base_url: str | None
@@ -46,7 +47,7 @@ class SettingsManager:
     @staticmethod
     def _load_passphrase() -> str:
         """Load encryption passphrase from Docker Secret or env var."""
-        secret_path = "/run/secrets/swabbarr_encryption_key"
+        secret_path = "/run/secrets/swabrr_encryption_key"
         try:
             with open(secret_path, "r") as f:
                 return f.read().strip()
@@ -56,7 +57,7 @@ class SettingsManager:
             if not key:
                 raise RuntimeError(
                     "No encryption key found. Set SWABBARR_ENCRYPTION_KEY "
-                    "or provide /run/secrets/swabbarr_encryption_key"
+                    "or provide /run/secrets/swabrr_encryption_key"
                 )
             return key
 
@@ -80,15 +81,19 @@ class SettingsManager:
                 api_key = r["api_key"]
             except Exception:
                 pass  # Decryption returns None if no key stored
-            services.append(ServiceConfig(
-                service_name=r["service_name"],
-                display_name=r["display_name"],
-                base_url=r["base_url"],
-                api_key=api_key,
-                enabled=r["enabled"],
-                last_verified=r["last_verified"].isoformat() if r["last_verified"] else None,
-                verify_status=r["verify_status"] or "unknown",
-            ))
+            services.append(
+                ServiceConfig(
+                    service_name=r["service_name"],
+                    display_name=r["display_name"],
+                    base_url=r["base_url"],
+                    api_key=api_key,
+                    enabled=r["enabled"],
+                    last_verified=r["last_verified"].isoformat()
+                    if r["last_verified"]
+                    else None,
+                    verify_status=r["verify_status"] or "unknown",
+                )
+            )
         return services
 
     async def get_service(self, service_name: str) -> ServiceConfig | None:
@@ -102,7 +107,8 @@ class SettingsManager:
                 FROM service_settings
                 WHERE service_name = $2
                 """,
-                self._passphrase, service_name,
+                self._passphrase,
+                service_name,
             )
         if not r:
             return None
@@ -117,7 +123,9 @@ class SettingsManager:
             base_url=r["base_url"],
             api_key=api_key,
             enabled=r["enabled"],
-            last_verified=r["last_verified"].isoformat() if r["last_verified"] else None,
+            last_verified=r["last_verified"].isoformat()
+            if r["last_verified"]
+            else None,
             verify_status=r["verify_status"] or "unknown",
         )
 
@@ -145,7 +153,8 @@ class SettingsManager:
             if base_url is not None:
                 await conn.execute(
                     "UPDATE service_settings SET base_url = $1 WHERE service_name = $2",
-                    base_url, service_name,
+                    base_url,
+                    service_name,
                 )
 
             if api_key is not None:
@@ -155,7 +164,9 @@ class SettingsManager:
                     SET api_key_enc = pgp_sym_encrypt($1, $2)
                     WHERE service_name = $3
                     """,
-                    api_key, self._passphrase, service_name,
+                    api_key,
+                    self._passphrase,
+                    service_name,
                 )
                 # Auto-enable when an API key is provided
                 if enabled is None:
@@ -167,7 +178,8 @@ class SettingsManager:
             if enabled is not None:
                 await conn.execute(
                     "UPDATE service_settings SET enabled = $1 WHERE service_name = $2",
-                    enabled, service_name,
+                    enabled,
+                    service_name,
                 )
 
         self._log.success(f"Service '{service_name}' settings updated")
@@ -186,7 +198,8 @@ class SettingsManager:
                 SET verify_status = $1, last_verified = NOW()
                 WHERE service_name = $2
                 """,
-                status, service_name,
+                status,
+                service_name,
             )
 
 

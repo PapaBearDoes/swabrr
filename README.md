@@ -1,12 +1,12 @@
-# Swabbarr
+# Swabrr
 
 **Media Library Pruning Engine**
 
-Swabbarr connects to your existing *arr stack (Radarr, Sonarr, Seerr) and Plex ecosystem (via Tautulli) to score every movie and TV series in your library based on watch activity, request history, rarity, cultural value, and storage footprint — then surfaces the best removal candidates through a web dashboard so you can make informed decisions about what to keep and what to toss.
+Swabrr connects to your existing *arr stack (Radarr, Sonarr, Seerr) and Plex ecosystem (via Tautulli) to score every movie and TV series in your library based on watch activity, request history, rarity, cultural value, and storage footprint — then surfaces the best removal candidates through a web dashboard so you can make informed decisions about what to keep and what to toss.
 
 **The name:** "Swabbing the deck" — cleaning up what's cluttering the ship.
 
-**The rule:** Swabbarr recommends. A human decides. No auto-deletion. Ever.
+**The rule:** Swabrr recommends. A human decides. No auto-deletion. Ever.
 
 ---
 
@@ -40,9 +40,9 @@ TMDB API ──────┘
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
-| `swabbarr-api` | Python 3.13 / FastAPI | Scoring engine, API clients, REST endpoints |
-| `swabbarr-web` | Next.js | Dashboard frontend |
-| `swabbarr-db` | PostgreSQL 17 | Scores, configuration, audit history |
+| `swabrr-api` | Python 3.13 / FastAPI | Scoring engine, API clients, REST endpoints |
+| `swabrr-web` | Next.js | Dashboard frontend |
+| `swabrr-db` | PostgreSQL 17 | Scores, configuration, audit history |
 
 All components run as Docker containers, orchestrated by `docker-compose.yml`.
 
@@ -65,23 +65,23 @@ All components run as Docker containers, orchestrated by `docker-compose.yml`.
 
 ## Quick Start
 
-> **Coming soon** — Swabbarr is in active development.
+> **Coming soon** — Swabrr is in active development.
 
 ```bash
 # Clone the repo
-git clone https://github.com/PapaBearDoes/swabbarr.git
-cd swabbarr
+git clone https://github.com/PapaBearDoes/swabrr.git
+cd swabrr
 
 # Copy environment template and configure
 cp ./.env.template ./.env
 # Edit .env with your service URLs
 
 # Add keys as Docker Secrets
-openssl rand -base64 24 | tr -d '\n' > api/secrets/swabbarr_db_password
-openssl rand -base64 36 | tr -d '\n' > api/secrets/swabbarr_encryption_key
+openssl rand -base64 24 | tr -d '\n' > api/secrets/swabrr_db_password
+openssl rand -base64 36 | tr -d '\n' > api/secrets/swabrr_encryption_key
 
 # Change permissions
-chmod 600 swabbarr_db_password swabbarr_encryption_key
+chmod 600 swabrr_db_password swabrr_encryption_key
 
 # Start the stack
 docker compose up -d
@@ -92,8 +92,8 @@ docker compose up -d
 ## Project Structure
 
 ```
-swabbarr/
-├── api/                    ← swabbarr-api (FastAPI + scoring engine)
+swabrr/
+├── api/                    ← swabrr-api (FastAPI + scoring engine)
 │   ├── src/
 │   │   ├── main.py
 │   │   ├── managers/       ← DB, config, logging managers
@@ -102,7 +102,7 @@ swabbarr/
 │   │   └── routers/        ← REST API endpoints
 │   ├── Dockerfile
 │   └── secrets/
-├── web/                    ← swabbarr-web (Next.js dashboard)
+├── web/                    ← swabrr-web (Next.js dashboard)
 ├── db/                     ← PostgreSQL schema and migrations
 ├── docs/
 │   ├── standards/          ← Charter, project instructions

@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Sonarr API client. Fetches TV series metadata, episode counts, file sizes,
@@ -9,9 +9,9 @@ and TVDB/TMDB IDs. Used for both Sonarr and Sonarr-Anime instances.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -24,6 +24,7 @@ from src.clients.base_client import BaseClient
 @dataclass
 class SonarrSeries:
     """Structured series data from Sonarr."""
+
     sonarr_id: int
     tvdb_id: int | None
     tmdb_id: int | None
@@ -96,27 +97,27 @@ class SonarrClient(BaseClient):
                 # Sonarr v4+ may include tmdbId directly
                 tmdb_id = item.get("tmdbId")
 
-                series_list.append(SonarrSeries(
-                    sonarr_id=item.get("id", 0),
-                    tvdb_id=item.get("tvdbId"),
-                    tmdb_id=tmdb_id,
-                    title=item.get("title", "Unknown"),
-                    year=item.get("year"),
-                    file_size_bytes=stats.get("sizeOnDisk", 0),
-                    episode_count=stats.get("episodeFileCount", 0),
-                    quality_profile=item.get("qualityProfileId"),
-                    added_at=item.get("added"),
-                    arr_source=self._arr_source,
-                ))
+                series_list.append(
+                    SonarrSeries(
+                        sonarr_id=item.get("id", 0),
+                        tvdb_id=item.get("tvdbId"),
+                        tmdb_id=tmdb_id,
+                        title=item.get("title", "Unknown"),
+                        year=item.get("year"),
+                        file_size_bytes=stats.get("sizeOnDisk", 0),
+                        episode_count=stats.get("episodeFileCount", 0),
+                        quality_profile=item.get("qualityProfileId"),
+                        added_at=item.get("added"),
+                        arr_source=self._arr_source,
+                    )
+                )
             except Exception as e:
                 self._log.warning(
                     f"{self.service_name}: Skipping malformed series entry: {e}"
                 )
                 continue
 
-        self._log.info(
-            f"{self.service_name}: Fetched {len(series_list)} series"
-        )
+        self._log.info(f"{self.service_name}: Fetched {len(series_list)} series")
         return series_list
 
 

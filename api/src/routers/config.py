@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Config router — read and update scoring weights and threshold.
@@ -8,9 +8,9 @@ Config router — read and update scoring weights and threshold.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -22,6 +22,7 @@ router = APIRouter()
 
 class WeightsUpdate(BaseModel):
     """Request body for updating scoring weights."""
+
     watch_activity: float = Field(ge=0, le=100)
     rarity: float = Field(ge=0, le=100)
     request_accountability: float = Field(ge=0, le=100)
@@ -31,6 +32,7 @@ class WeightsUpdate(BaseModel):
 
 class ThresholdUpdate(BaseModel):
     """Request body for updating the candidate threshold."""
+
     candidate_threshold: float = Field(ge=0, le=100)
 
 

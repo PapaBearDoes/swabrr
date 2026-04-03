@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Core scoring engine. Orchestrates the full scoring pipeline:
@@ -10,9 +10,9 @@ compute weighted scores → persist results to PostgreSQL.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.2.1
 LAST MODIFIED: 2026-04-02
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -83,8 +83,12 @@ class ScoringEngine:
 
         # Close existing clients
         for client in [
-            self._radarr, self._sonarr, self._sonarr_anime,
-            self._tautulli, self._seerr, self._tmdb,
+            self._radarr,
+            self._sonarr,
+            self._sonarr_anime,
+            self._tautulli,
+            self._seerr,
+            self._tmdb,
         ]:
             if client:
                 try:
@@ -159,7 +163,9 @@ class ScoringEngine:
                                     await conn.execute(
                                         "INSERT INTO tvdb_tmdb_map (tvdb_id, tmdb_id, title) "
                                         "VALUES ($1, $2, $3) ON CONFLICT (tvdb_id) DO NOTHING",
-                                        s.tvdb_id, tmdb_id, s.title,
+                                        s.tvdb_id,
+                                        tmdb_id,
+                                        s.title,
                                     )
                     if not tmdb_id:
                         self._log.debug(
@@ -177,9 +183,7 @@ class ScoringEngine:
                         arr_source=s.arr_source,
                         added_at=s.added_at,
                     )
-                self._log.info(
-                    f"Merged {len(series_list)} series from {client_name}"
-                )
+                self._log.info(f"Merged {len(series_list)} series from {client_name}")
             else:
                 warnings.append(f"{client_name} unavailable")
 
@@ -233,12 +237,8 @@ class ScoringEngine:
 
         # --- TMDB: cultural value + streaming availability ---
         if self._tmdb:
-            tmdb_ids = [
-                (r.tmdb_id, r.media_type) for r in records_by_tmdb.values()
-            ]
-            tmdb_data = await self._tmdb.batch_fetch(
-                tmdb_ids, db_manager=self._db
-            )
+            tmdb_ids = [(r.tmdb_id, r.media_type) for r in records_by_tmdb.values()]
+            tmdb_data = await self._tmdb.batch_fetch(tmdb_ids, db_manager=self._db)
             enriched = 0
             for tmdb_id, info in tmdb_data.items():
                 record = records_by_tmdb.get(tmdb_id)
@@ -297,23 +297,24 @@ class ScoringEngine:
             keep_score = round(min(max(keep_score, 0.0), 100.0), 2)
 
             is_candidate = (
-                keep_score < weights.candidate_threshold
-                and not record.is_protected
+                keep_score < weights.candidate_threshold and not record.is_protected
             )
 
-            scores.append(ScoreBreakdown(
-                tmdb_id=record.tmdb_id,
-                keep_score=keep_score,
-                watch_activity_score=round(watch, 2),
-                rarity_score=round(rarity, 2),
-                request_score=round(request, 2),
-                size_efficiency_score=round(size_eff, 2),
-                cultural_value_score=round(cultural, 2),
-                is_candidate=is_candidate,
-                file_size_bytes=record.file_size_bytes,
-                title=record.title,
-                media_type=record.media_type,
-            ))
+            scores.append(
+                ScoreBreakdown(
+                    tmdb_id=record.tmdb_id,
+                    keep_score=keep_score,
+                    watch_activity_score=round(watch, 2),
+                    rarity_score=round(rarity, 2),
+                    request_score=round(request, 2),
+                    size_efficiency_score=round(size_eff, 2),
+                    cultural_value_score=round(cultural, 2),
+                    is_candidate=is_candidate,
+                    file_size_bytes=record.file_size_bytes,
+                    title=record.title,
+                    media_type=record.media_type,
+                )
+            )
 
         return scores
 
@@ -372,9 +373,15 @@ class ScoringEngine:
                         episode_count = EXCLUDED.episode_count,
                         updated_at = NOW()
                     """,
-                    record.tmdb_id, record.media_type, record.title,
-                    record.year, self._parse_ts(record.added_at), record.file_size_bytes,
-                    record.quality_profile, record.arr_id, record.arr_source,
+                    record.tmdb_id,
+                    record.media_type,
+                    record.title,
+                    record.year,
+                    self._parse_ts(record.added_at),
+                    record.file_size_bytes,
+                    record.quality_profile,
+                    record.arr_id,
+                    record.arr_source,
                     record.episode_count,
                 )
 
@@ -399,10 +406,15 @@ class ScoringEngine:
                         is_candidate
                     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
                     """,
-                    item_id, run_id, score.keep_score,
-                    score.watch_activity_score, score.rarity_score,
-                    score.request_score, score.size_efficiency_score,
-                    score.cultural_value_score, score.is_candidate,
+                    item_id,
+                    run_id,
+                    score.keep_score,
+                    score.watch_activity_score,
+                    score.rarity_score,
+                    score.request_score,
+                    score.size_efficiency_score,
+                    score.cultural_value_score,
+                    score.is_candidate,
                 )
 
             # Insert watch data cache
@@ -418,10 +430,15 @@ class ScoringEngine:
                         requested_by, requestor_watched, request_date
                     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
                     """,
-                    item_id, run_id, record.total_plays,
-                    record.unique_viewers, self._parse_ts(record.last_watched_at),
-                    record.avg_completion_pct, record.requested_by,
-                    record.requestor_watched, self._parse_ts(record.request_date),
+                    item_id,
+                    run_id,
+                    record.total_plays,
+                    record.unique_viewers,
+                    self._parse_ts(record.last_watched_at),
+                    record.avg_completion_pct,
+                    record.requested_by,
+                    record.requestor_watched,
+                    self._parse_ts(record.request_date),
                 )
 
     # -----------------------------------------------------------------------
@@ -446,7 +463,8 @@ class ScoringEngine:
                 VALUES ($1, $2)
                 RETURNING id
                 """,
-                started_at, trigger,
+                started_at,
+                trigger,
             )
             run_id = row["id"]
 
@@ -489,7 +507,7 @@ class ScoringEngine:
 
             # Step 4: Stale candidate detection
             # Titles in media_items that are no longer in *arr responses
-            # were deleted outside Swabbarr — auto-move to removal_history
+            # were deleted outside Swabrr — auto-move to removal_history
             current_tmdb_ids = {r.tmdb_id for r in records}
             stale_count = 0
             async with self._db.acquire() as conn:
@@ -512,8 +530,11 @@ class ScoringEngine:
                                 file_size_bytes, final_keep_score
                             ) VALUES ($1, $2, $3, $4, $5, $6)
                             """,
-                            row["id"], row["tmdb_id"], row["title"],
-                            row["media_type"], row["file_size_bytes"],
+                            row["id"],
+                            row["tmdb_id"],
+                            row["title"],
+                            row["media_type"],
+                            row["file_size_bytes"],
                             float(last_score) if last_score else None,
                         )
                         stale_count += 1
@@ -521,7 +542,7 @@ class ScoringEngine:
             if stale_count > 0:
                 self._log.info(
                     f"Stale detection: {stale_count} titles removed outside "
-                    f"Swabbarr — moved to removal history"
+                    f"Swabrr — moved to removal history"
                 )
 
             # Finalize run
@@ -538,8 +559,13 @@ class ScoringEngine:
                         partial_data = $5, notes = $6
                     WHERE id = $7
                     """,
-                    completed_at, len(scores), len(candidates),
-                    reclaimable, result.partial_data, result.notes, run_id,
+                    completed_at,
+                    len(scores),
+                    len(candidates),
+                    reclaimable,
+                    result.partial_data,
+                    result.notes,
+                    run_id,
                 )
 
             result.completed_at = completed_at
@@ -548,7 +574,7 @@ class ScoringEngine:
             result.space_reclaimable_bytes = reclaimable
             result.scores = scores
 
-            reclaimable_gb = reclaimable / (1024 ** 3)
+            reclaimable_gb = reclaimable / (1024**3)
             self._log.success(
                 f"Scoring complete: {len(scores)} titles scored, "
                 f"{len(candidates)} candidates, "
@@ -561,7 +587,8 @@ class ScoringEngine:
             async with self._db.acquire() as conn:
                 await conn.execute(
                     "UPDATE scoring_runs SET notes = $1 WHERE id = $2",
-                    result.notes, run_id,
+                    result.notes,
+                    run_id,
                 )
 
         return result

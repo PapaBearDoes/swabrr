@@ -1,5 +1,5 @@
 # ============================================================================
-# Swabbarr — Docker Compose
+# Swabrr — Docker Compose
 # ============================================================================
 # FILE VERSION: v1.0.0
 # LAST MODIFIED: 2026-04-01
@@ -7,41 +7,41 @@
 
 services:
   # --------------------------------------------------------------------------
-  # swabbarr-db — PostgreSQL 17
+  # swabrr-db — PostgreSQL 17
   # --------------------------------------------------------------------------
-  swabbarr-db:
+  swabrr-db:
     image: postgres:17-alpine
-    container_name: swabbarr-db
+    container_name: swabrr-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${SWABBARR_DB_NAME:-swabbarr}
-      POSTGRES_USER: ${SWABBARR_DB_USER:-swabbarr}
-      POSTGRES_PASSWORD_FILE: /run/secrets/swabbarr_db_password
+      POSTGRES_DB: ${SWABBARR_DB_NAME:-swabrr}
+      POSTGRES_USER: ${SWABBARR_DB_USER:-swabrr}
+      POSTGRES_PASSWORD_FILE: /run/secrets/swabrr_db_password
     secrets:
-      - swabbarr_db_password
+      - swabrr_db_password
     volumes:
-      - swabbarr-db-data:/var/lib/postgresql/data
+      - swabrr-db-data:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SWABBARR_DB_USER:-swabbarr}"]
+      test: ["CMD-SHELL", "pg_isready -U ${SWABBARR_DB_USER:-swabrr}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   # --------------------------------------------------------------------------
-  # swabbarr-api — FastAPI + Scoring Engine
+  # swabrr-api — FastAPI + Scoring Engine
   # --------------------------------------------------------------------------
-  swabbarr-api:
-    image: ghcr.io/papabeardoes/swabbarr-api:latest
+  swabrr-api:
+    image: ghcr.io/papabeardoes/swabrr-api:latest
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: swabbarr-api
+    container_name: swabrr-api
     restart: unless-stopped
     depends_on:
-      swabbarr-db:
+      swabrr-db:
         condition: service_healthy
     environment:
       PUID: ${PUID:-1000}
@@ -49,10 +49,10 @@ services:
       TZ: ${TZ:-America/Los_Angeles}
       SWABBARR_LOG_LEVEL: ${SWABBARR_LOG_LEVEL:-INFO}
       SWABBARR_LOG_FORMAT: ${SWABBARR_LOG_FORMAT:-human}
-      SWABBARR_DB_HOST: swabbarr-db
+      SWABBARR_DB_HOST: swabrr-db
       SWABBARR_DB_PORT: ${SWABBARR_DB_PORT:-5432}
-      SWABBARR_DB_NAME: ${SWABBARR_DB_NAME:-swabbarr}
-      SWABBARR_DB_USER: ${SWABBARR_DB_USER:-swabbarr}
+      SWABBARR_DB_NAME: ${SWABBARR_DB_NAME:-swabrr}
+      SWABBARR_DB_USER: ${SWABBARR_DB_USER:-swabrr}
       SWABBARR_TMDB_REGION: ${SWABBARR_TMDB_REGION:-US}
       SWABBARR_SCORE_CRON: ${SWABBARR_SCORE_CRON:-0 3 * * 0}
       SWABBARR_API_HOST: ${SWABBARR_API_HOST:-0.0.0.0}
@@ -60,25 +60,25 @@ services:
       SWABBARR_HTTP_TIMEOUT: ${SWABBARR_HTTP_TIMEOUT:-30}
       SWABBARR_HTTP_RETRIES: ${SWABBARR_HTTP_RETRIES:-3}
     secrets:
-      - swabbarr_db_password
-      - swabbarr_encryption_key
+      - swabrr_db_password
+      - swabrr_encryption_key
     ports:
       - "${SWABBARR_API_PORT:-8484}:8484"
 
   # --------------------------------------------------------------------------
-  # swabbarr-web — Next.js Dashboard
+  # swabrr-web — Next.js Dashboard
   # --------------------------------------------------------------------------
-  swabbarr-web:
-    image: ghcr.io/papabeardoes/swabbarr-web:latest
+  swabrr-web:
+    image: ghcr.io/papabeardoes/swabrr-web:latest
     build:
       context: ./web
       dockerfile: Dockerfile
-    container_name: swabbarr-web
+    container_name: swabrr-web
     restart: unless-stopped
     depends_on:
-      - swabbarr-api
+      - swabrr-api
     environment:
-      NEXT_PUBLIC_API_URL: http://swabbarr-api:8484
+      NEXT_PUBLIC_API_URL: http://swabrr-api:8484
     ports:
       - "3000:3000"
 
@@ -86,13 +86,13 @@ services:
 # Secrets
 # ----------------------------------------------------------------------------
 secrets:
-  swabbarr_db_password:
-    file: ./api/secrets/swabbarr_db_password
-  swabbarr_encryption_key:
-    file: ./api/secrets/swabbarr_encryption_key
+  swabrr_db_password:
+    file: ./api/secrets/swabrr_db_password
+  swabrr_encryption_key:
+    file: ./api/secrets/swabrr_encryption_key
 
 # ----------------------------------------------------------------------------
 # Volumes
 # ----------------------------------------------------------------------------
 volumes:
-  swabbarr-db-data:
+  swabrr-db-data:

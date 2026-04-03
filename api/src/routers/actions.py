@@ -1,6 +1,6 @@
 """
 ============================================================================
-Swabbarr — Media Library Pruning Engine
+Swabrr — Media Library Pruning Engine
 ============================================================================
 
 Actions router — trigger scoring runs, mark titles as removed,
@@ -9,9 +9,9 @@ view removal history.
 ----------------------------------------------------------------------------
 FILE VERSION: v1.0.0
 LAST MODIFIED: 2026-04-01
-COMPONENT: swabbarr-api
+COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
-Repository: https://github.com/PapaBearDoes/swabbarr
+Repository: https://github.com/PapaBearDoes/swabrr
 ============================================================================
 """
 
@@ -31,7 +31,9 @@ _scoring_status = {"running": False, "last_result": None}
 async def trigger_scoring_run(request: Request):
     """Trigger a manual scoring run."""
     if _scoring_lock.locked():
-        raise HTTPException(status_code=409, detail="A scoring run is already in progress")
+        raise HTTPException(
+            status_code=409, detail="A scoring run is already in progress"
+        )
 
     engine = request.app.state.scoring_engine
 
@@ -42,7 +44,9 @@ async def trigger_scoring_run(request: Request):
             _scoring_status["last_result"] = {
                 "run_id": result.run_id,
                 "started_at": result.started_at.isoformat(),
-                "completed_at": result.completed_at.isoformat() if result.completed_at else None,
+                "completed_at": result.completed_at.isoformat()
+                if result.completed_at
+                else None,
                 "titles_scored": result.titles_scored,
                 "candidates_flagged": result.candidates_flagged,
                 "space_reclaimable_bytes": result.space_reclaimable_bytes,
@@ -106,8 +110,12 @@ async def mark_removed(request: Request, tmdb_id: int):
                 file_size_bytes, final_keep_score
             ) VALUES ($1, $2, $3, $4, $5, $6)
             """,
-            item["id"], item["tmdb_id"], item["title"],
-            item["media_type"], item["file_size_bytes"], final_score,
+            item["id"],
+            item["tmdb_id"],
+            item["title"],
+            item["media_type"],
+            item["file_size_bytes"],
+            final_score,
         )
 
         # Remove from protected titles if it was protected
@@ -137,9 +145,7 @@ async def removal_history(
     """Get removal history with cumulative space reclaimed."""
     db = request.app.state.db_manager
     async with db.acquire() as conn:
-        count_row = await conn.fetchrow(
-            "SELECT COUNT(*) as total FROM removal_history"
-        )
+        count_row = await conn.fetchrow("SELECT COUNT(*) as total FROM removal_history")
         total_removed = await conn.fetchval(
             "SELECT COALESCE(SUM(file_size_bytes), 0) FROM removal_history"
         )
@@ -153,7 +159,8 @@ async def removal_history(
             ORDER BY removed_at DESC
             LIMIT $1 OFFSET $2
             """,
-            per_page, offset,
+            per_page,
+            offset,
         )
 
     return {
@@ -179,6 +186,7 @@ async def get_schedule(request: Request):
 
 class ScheduleUpdate(BaseModel):
     """Request body for updating the schedule."""
+
     cron_expression: str
 
 
@@ -210,9 +218,7 @@ async def run_history(
     """Get past scoring run history with stats."""
     db = request.app.state.db_manager
     async with db.acquire() as conn:
-        count_row = await conn.fetchrow(
-            "SELECT COUNT(*) as total FROM scoring_runs"
-        )
+        count_row = await conn.fetchrow("SELECT COUNT(*) as total FROM scoring_runs")
         offset = (page - 1) * per_page
         rows = await conn.fetch(
             """
@@ -223,7 +229,8 @@ async def run_history(
             ORDER BY started_at DESC
             LIMIT $1 OFFSET $2
             """,
-            per_page, offset,
+            per_page,
+            offset,
         )
 
     return {
@@ -239,6 +246,7 @@ async def run_history(
 # ---------------------------------------------------------------------------
 class BatchRemoveRequest(BaseModel):
     """Request body for batch removal."""
+
     tmdb_ids: list[int]
 
 
@@ -274,8 +282,12 @@ async def batch_mark_removed(request: Request, body: BatchRemoveRequest):
                     file_size_bytes, final_keep_score
                 ) VALUES ($1, $2, $3, $4, $5, $6)
                 """,
-                item["id"], item["tmdb_id"], item["title"],
-                item["media_type"], item["file_size_bytes"], final_score,
+                item["id"],
+                item["tmdb_id"],
+                item["title"],
+                item["media_type"],
+                item["file_size_bytes"],
+                final_score,
             )
             await conn.execute(
                 "DELETE FROM protected_titles WHERE media_item_id = $1",
@@ -283,11 +295,13 @@ async def batch_mark_removed(request: Request, body: BatchRemoveRequest):
             )
 
             total_freed += item["file_size_bytes"]
-            removed.append({
-                "tmdb_id": tmdb_id,
-                "title": item["title"],
-                "file_size_bytes": item["file_size_bytes"],
-            })
+            removed.append(
+                {
+                    "tmdb_id": tmdb_id,
+                    "title": item["title"],
+                    "file_size_bytes": item["file_size_bytes"],
+                }
+            )
 
     return {
         "status": "removed",
@@ -334,27 +348,43 @@ async def export_candidates(request: Request):
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "tmdb_id", "title", "year", "type", "size_bytes",
-        "keep_score", "watch_activity", "rarity",
-        "request", "size_efficiency", "cultural_value",
-    ])
+    writer.writerow(
+        [
+            "tmdb_id",
+            "title",
+            "year",
+            "type",
+            "size_bytes",
+            "keep_score",
+            "watch_activity",
+            "rarity",
+            "request",
+            "size_efficiency",
+            "cultural_value",
+        ]
+    )
     for r in rows:
-        writer.writerow([
-            r["tmdb_id"], r["title"], r["year"], r["media_type"],
-            r["file_size_bytes"], float(r["keep_score"]),
-            float(r["watch_activity_score"] or 0),
-            float(r["rarity_score"] or 0),
-            float(r["request_score"] or 0),
-            float(r["size_efficiency_score"] or 0),
-            float(r["cultural_value_score"] or 0),
-        ])
+        writer.writerow(
+            [
+                r["tmdb_id"],
+                r["title"],
+                r["year"],
+                r["media_type"],
+                r["file_size_bytes"],
+                float(r["keep_score"]),
+                float(r["watch_activity_score"] or 0),
+                float(r["rarity_score"] or 0),
+                float(r["request_score"] or 0),
+                float(r["size_efficiency_score"] or 0),
+                float(r["cultural_value_score"] or 0),
+            ]
+        )
 
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=swabbarr-candidates.csv"},
+        headers={"Content-Disposition": "attachment; filename=swabrr-candidates.csv"},
     )
 
 
@@ -377,21 +407,33 @@ async def export_history(request: Request):
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "tmdb_id", "title", "type", "size_bytes",
-        "final_score", "removed_at",
-    ])
+    writer.writerow(
+        [
+            "tmdb_id",
+            "title",
+            "type",
+            "size_bytes",
+            "final_score",
+            "removed_at",
+        ]
+    )
     for r in rows:
-        writer.writerow([
-            r["tmdb_id"], r["title"], r["media_type"],
-            r["file_size_bytes"],
-            float(r["final_keep_score"]) if r["final_keep_score"] else "",
-            r["removed_at"].isoformat() if r["removed_at"] else "",
-        ])
+        writer.writerow(
+            [
+                r["tmdb_id"],
+                r["title"],
+                r["media_type"],
+                r["file_size_bytes"],
+                float(r["final_keep_score"]) if r["final_keep_score"] else "",
+                r["removed_at"].isoformat() if r["removed_at"] else "",
+            ]
+        )
 
     output.seek(0)
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=swabbarr-removal-history.csv"},
+        headers={
+            "Content-Disposition": "attachment; filename=swabrr-removal-history.csv"
+        },
     )
