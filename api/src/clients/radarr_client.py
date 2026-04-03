@@ -7,8 +7,8 @@ Radarr API client. Fetches movie metadata, file sizes, quality profiles,
 and TMDB IDs for all movies in the library.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabrr
@@ -76,6 +76,10 @@ class RadarrClient(BaseClient):
             try:
                 tmdb_id = item.get("tmdbId")
                 if not tmdb_id:
+                    continue
+
+                # Skip undownloaded placeholders (0 bytes on disk)
+                if not item.get("hasFile", False) or item.get("sizeOnDisk", 0) == 0:
                     continue
 
                 # Determine quality from movie file if present

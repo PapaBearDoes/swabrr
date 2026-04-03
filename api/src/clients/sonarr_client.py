@@ -7,8 +7,8 @@ Sonarr API client. Fetches TV series metadata, episode counts, file sizes,
 and TVDB/TMDB IDs. Used for both Sonarr and Sonarr-Anime instances.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.0.0
-LAST MODIFIED: 2026-04-01
+FILE VERSION: v1.0.1
+LAST MODIFIED: 2026-04-02
 COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabrr
@@ -93,6 +93,10 @@ class SonarrClient(BaseClient):
         for item in data:
             try:
                 stats = item.get("statistics", {})
+
+                # Skip undownloaded placeholders (0 bytes on disk)
+                if stats.get("sizeOnDisk", 0) == 0:
+                    continue
 
                 # Sonarr v4+ may include tmdbId directly
                 tmdb_id = item.get("tmdbId")
