@@ -14,8 +14,8 @@ services:
     container_name: swabrr-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${SWABBARR_DB_NAME:-swabrr}
-      POSTGRES_USER: ${SWABBARR_DB_USER:-swabrr}
+      POSTGRES_DB: ${SWABRR_DB_NAME:-swabrr}
+      POSTGRES_USER: ${SWABRR_DB_USER:-swabrr}
       POSTGRES_PASSWORD_FILE: /run/secrets/swabrr_db_password
     secrets:
       - swabrr_db_password
@@ -25,7 +25,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SWABBARR_DB_USER:-swabrr}"]
+      test: ["CMD-SHELL", "pg_isready -U ${SWABRR_DB_USER:-swabrr}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,23 +47,23 @@ services:
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
       TZ: ${TZ:-America/Los_Angeles}
-      SWABBARR_LOG_LEVEL: ${SWABBARR_LOG_LEVEL:-INFO}
-      SWABBARR_LOG_FORMAT: ${SWABBARR_LOG_FORMAT:-human}
-      SWABBARR_DB_HOST: swabrr-db
-      SWABBARR_DB_PORT: ${SWABBARR_DB_PORT:-5432}
-      SWABBARR_DB_NAME: ${SWABBARR_DB_NAME:-swabrr}
-      SWABBARR_DB_USER: ${SWABBARR_DB_USER:-swabrr}
-      SWABBARR_TMDB_REGION: ${SWABBARR_TMDB_REGION:-US}
-      SWABBARR_SCORE_CRON: ${SWABBARR_SCORE_CRON:-0 3 * * 0}
-      SWABBARR_API_HOST: ${SWABBARR_API_HOST:-0.0.0.0}
-      SWABBARR_API_PORT: ${SWABBARR_API_PORT:-8484}
-      SWABBARR_HTTP_TIMEOUT: ${SWABBARR_HTTP_TIMEOUT:-30}
-      SWABBARR_HTTP_RETRIES: ${SWABBARR_HTTP_RETRIES:-3}
+      SWABRR_LOG_LEVEL: ${SWABRR_LOG_LEVEL:-INFO}
+      SWABRR_LOG_FORMAT: ${SWABRR_LOG_FORMAT:-human}
+      SWABRR_DB_HOST: swabrr-db
+      SWABRR_DB_PORT: ${SWABRR_DB_PORT:-5432}
+      SWABRR_DB_NAME: ${SWABRR_DB_NAME:-swabrr}
+      SWABRR_DB_USER: ${SWABRR_DB_USER:-swabrr}
+      SWABRR_TMDB_REGION: ${SWABRR_TMDB_REGION:-US}
+      SWABRR_SCORE_CRON: ${SWABRR_SCORE_CRON:-0 3 * * 0}
+      SWABRR_API_HOST: ${SWABRR_API_HOST:-0.0.0.0}
+      SWABRR_API_PORT: ${SWABRR_API_PORT:-8484}
+      SWABRR_HTTP_TIMEOUT: ${SWABRR_HTTP_TIMEOUT:-30}
+      SWABRR_HTTP_RETRIES: ${SWABRR_HTTP_RETRIES:-3}
     secrets:
       - swabrr_db_password
       - swabrr_encryption_key
     ports:
-      - "${SWABBARR_API_PORT:-8484}:8484"
+      - "${SWABRR_API_PORT:-8484}:8484"
 
   # --------------------------------------------------------------------------
   # swabrr-web — Next.js Dashboard

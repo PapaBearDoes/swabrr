@@ -53,10 +53,10 @@ class SettingsManager:
                 return f.read().strip()
         except FileNotFoundError:
             # Fallback to env var for development
-            key = os.environ.get("SWABBARR_ENCRYPTION_KEY", "")
+            key = os.environ.get("SWABRR_ENCRYPTION_KEY", "")
             if not key:
                 raise RuntimeError(
-                    "No encryption key found. Set SWABBARR_ENCRYPTION_KEY "
+                    "No encryption key found. Set SWABRR_ENCRYPTION_KEY "
                     "or provide /run/secrets/swabrr_encryption_key"
                 )
             return key

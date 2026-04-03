@@ -77,10 +77,10 @@ async def create_db_manager(log: logging.Logger) -> DBManager:
     Reads connection parameters from environment variables and
     the database password from Docker Secrets.
     """
-    host = os.environ.get("SWABBARR_DB_HOST", "swabrr-db")
-    port = int(os.environ.get("SWABBARR_DB_PORT", "5432"))
-    database = os.environ.get("SWABBARR_DB_NAME", "swabrr")
-    user = os.environ.get("SWABBARR_DB_USER", "swabrr")
+    host = os.environ.get("SWABRR_DB_HOST", "swabrr-db")
+    port = int(os.environ.get("SWABRR_DB_PORT", "5432"))
+    database = os.environ.get("SWABRR_DB_NAME", "swabrr")
+    user = os.environ.get("SWABRR_DB_USER", "swabrr")
 
     # Read password from Docker Secret
     secret_path = "/run/secrets/swabrr_db_password"

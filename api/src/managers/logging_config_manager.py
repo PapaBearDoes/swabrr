@@ -98,11 +98,11 @@ class LoggingConfigManager:
         self._silence_noisy_libraries()
 
     def _resolve_level(self) -> int:
-        level_name = os.environ.get("SWABBARR_LOG_LEVEL", "INFO").upper()
+        level_name = os.environ.get("SWABRR_LOG_LEVEL", "INFO").upper()
         return getattr(logging, level_name, logging.INFO)
 
     def _detect_color_support(self) -> bool:
-        log_format = os.environ.get("SWABBARR_LOG_FORMAT", "human").lower()
+        log_format = os.environ.get("SWABRR_LOG_FORMAT", "human").lower()
         if log_format == "json":
             return False
         return hasattr(sys.stderr, "isatty") and sys.stderr.isatty()

@@ -38,7 +38,7 @@ class SchedulerManager:
         self._engine = scoring_engine
         self._log = log
         self._scheduler = AsyncIOScheduler()
-        self._cron_expr = os.environ.get("SWABBARR_SCORE_CRON", "0 3 * * 0")
+        self._cron_expr = os.environ.get("SWABRR_SCORE_CRON", "0 3 * * 0")
 
     async def _run_scoring(self) -> None:
         """Callback executed by APScheduler on schedule."""

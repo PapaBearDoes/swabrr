@@ -54,7 +54,7 @@ class TMDBClient(BaseClient):
             log=log,
             **kwargs,
         )
-        self._region = region or os.environ.get("SWABBARR_TMDB_REGION", "US")
+        self._region = region or os.environ.get("SWABRR_TMDB_REGION", "US")
         self._rate_delay = 0.05  # ~20 req/s, conservative under TMDB's 40/s limit
 
     @property

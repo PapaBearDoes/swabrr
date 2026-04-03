@@ -36,9 +36,9 @@ class BaseClient:
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._log = log
-        self._timeout = timeout or float(os.environ.get("SWABBARR_HTTP_TIMEOUT", "30"))
+        self._timeout = timeout or float(os.environ.get("SWABRR_HTTP_TIMEOUT", "30"))
         self._max_retries = max_retries or int(
-            os.environ.get("SWABBARR_HTTP_RETRIES", "3")
+            os.environ.get("SWABRR_HTTP_RETRIES", "3")
         )
         self._client: httpx.AsyncClient | None = None
 
