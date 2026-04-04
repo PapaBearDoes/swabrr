@@ -6,7 +6,7 @@ Swabrr — Media Library Pruning Engine
 Config router — read and update scoring weights and threshold.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.1.0
+FILE VERSION: v1.2.0
 LAST MODIFIED: 2026-04-04
 COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
@@ -30,6 +30,8 @@ class WeightsUpdate(BaseModel):
     cultural_value: float = Field(ge=0, le=100)
     classic_age_threshold: int | None = Field(default=None, ge=15, le=30)
     classic_bonus_points: float | None = Field(default=None, ge=0, le=10)
+    recent_age_threshold: int | None = Field(default=None, ge=1, le=5)
+    recent_bonus_points: float | None = Field(default=None, ge=0, le=10)
 
 
 class ThresholdUpdate(BaseModel):
@@ -52,6 +54,8 @@ async def get_weights(request: Request):
         "candidate_threshold": weights.candidate_threshold,
         "classic_age_threshold": weights.classic_age_threshold,
         "classic_bonus_points": weights.classic_bonus_points,
+        "recent_age_threshold": weights.recent_age_threshold,
+        "recent_bonus_points": weights.recent_bonus_points,
     }
 
 
@@ -72,6 +76,8 @@ async def update_weights(request: Request, body: WeightsUpdate):
         candidate_threshold=current.candidate_threshold,
         classic_age_threshold=body.classic_age_threshold if body.classic_age_threshold is not None else current.classic_age_threshold,
         classic_bonus_points=body.classic_bonus_points if body.classic_bonus_points is not None else current.classic_bonus_points,
+        recent_age_threshold=body.recent_age_threshold if body.recent_age_threshold is not None else current.recent_age_threshold,
+        recent_bonus_points=body.recent_bonus_points if body.recent_bonus_points is not None else current.recent_bonus_points,
     )
     success = await config.update_weights(new_weights)
     if not success:

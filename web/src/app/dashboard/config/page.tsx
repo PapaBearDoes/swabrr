@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getWeights, updateWeights, updateThreshold, getSchedule, updateSchedule } from '@/lib/api';
-import { Save, Clock, Award } from 'lucide-react';
+import { Save, Clock, Award, Zap } from 'lucide-react';
 
 export default function ConfigPage() {
   const [weights, setWeights] = useState({
@@ -12,6 +12,8 @@ export default function ConfigPage() {
   const [threshold, setThreshold] = useState(30);
   const [classicAge, setClassicAge] = useState(20);
   const [classicBonus, setClassicBonus] = useState(5);
+  const [recentAge, setRecentAge] = useState(2);
+  const [recentBonus, setRecentBonus] = useState(5);
   const [cron, setCron] = useState('0 3 * * 0');
   const [nextRun, setNextRun] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -30,6 +32,8 @@ export default function ConfigPage() {
         setThreshold(w.candidate_threshold);
         setClassicAge(w.classic_age_threshold ?? 20);
         setClassicBonus(w.classic_bonus_points ?? 5);
+        setRecentAge(w.recent_age_threshold ?? 2);
+        setRecentBonus(w.recent_bonus_points ?? 5);
         setCron(s.cron_expression || '0 3 * * 0');
         setNextRun(s.next_run);
       } catch (e) { console.error(e); }
@@ -49,7 +53,11 @@ export default function ConfigPage() {
     if (!isValid) { setMessage('Weights must sum to 100'); return; }
     setSaving(true);
     try {
-      await updateWeights({ ...weights, classic_age_threshold: classicAge, classic_bonus_points: classicBonus });
+      await updateWeights({
+        ...weights,
+        classic_age_threshold: classicAge, classic_bonus_points: classicBonus,
+        recent_age_threshold: recentAge, recent_bonus_points: recentBonus,
+      });
       await updateThreshold(threshold);
       setMessage('Configuration saved!');
     } catch (e: any) { setMessage(e.message || 'Save failed'); }
@@ -217,6 +225,54 @@ export default function ConfigPage() {
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12 }}>
           Applied as a flat boost after the weighted score is calculated. Saved with the weights above.
+        </div>
+      </div>
+
+      {/* Recent Title Bonus */}
+      <div className="card" style={{ marginTop: 24 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
+          <Zap size={18} style={{ display: 'inline', marginRight: 8, verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
+          Recent Title Bonus
+        </h2>
+        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
+          Titles newer than <span style={{ color: 'var(--accent-blue)', fontWeight: 700 }}>{recentAge} year{recentAge !== 1 ? 's' : ''}</span> receive
+          a <span style={{ color: 'var(--accent-teal)', fontWeight: 700 }}>+{recentBonus} point</span> bonus to their keep score.
+          {recentBonus === 0 && <span style={{ fontStyle: 'italic', marginLeft: 4 }}>(disabled)</span>}
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Age Threshold</label>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-blue)' }}>{recentAge} year{recentAge !== 1 ? 's' : ''}</span>
+            </div>
+            <input
+              type="range" min={1} max={5} step={1}
+              value={recentAge}
+              onChange={e => { setRecentAge(Number(e.target.value)); setMessage(''); }}
+              style={{ width: '100%', accentColor: 'var(--accent-blue)' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+              <span>1 yr</span><span>2 yr</span><span>3 yr</span><span>4 yr</span><span>5 yr</span>
+            </div>
+          </div>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <label style={{ fontSize: 13, fontWeight: 500 }}>Bonus Points</label>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent-teal)' }}>+{recentBonus}</span>
+            </div>
+            <input
+              type="range" min={0} max={10} step={1}
+              value={recentBonus}
+              onChange={e => { setRecentBonus(Number(e.target.value)); setMessage(''); }}
+              style={{ width: '100%', accentColor: 'var(--accent-teal)' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+              <span>0 (off)</span><span>5</span><span>10</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12 }}>
+          Protects new additions from being flagged before they have time to accumulate watch activity. Saved with the weights above.
         </div>
       </div>
 

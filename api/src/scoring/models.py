@@ -93,6 +93,8 @@ class ScoringWeights:
     candidate_threshold: float = 30.0
     classic_age_threshold: int = 20  # Years — titles older than this get bonus
     classic_bonus_points: float = 5.0  # Flat points added to keep_score (0–10)
+    recent_age_threshold: int = 2  # Years — titles newer than this get bonus
+    recent_bonus_points: float = 5.0  # Flat points added to keep_score (0–10)
 
 
 @dataclass

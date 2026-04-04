@@ -248,6 +248,8 @@ class ScoringEngine:
                     record.tmdb_rating = info.vote_average
                     record.tmdb_vote_count = info.vote_count
                     record.streaming_service_count = info.streaming_service_count
+                    if info.poster_path:
+                        record.poster_url = info.poster_path
                     enriched += 1
             self._log.info(
                 f"Enriched {enriched}/{len(records_by_tmdb)} titles with TMDB data"
@@ -307,6 +309,16 @@ class ScoringEngine:
                 and (current_year - record.year) >= weights.classic_age_threshold
             ):
                 keep_score += weights.classic_bonus_points
+
+            # Recent title bonus — flat boost for newer titles
+            # Protects fresh additions from being flagged before they
+            # have had enough time to accumulate watch activity.
+            if (
+                weights.recent_bonus_points > 0
+                and record.year is not None
+                and (current_year - record.year) <= weights.recent_age_threshold
+            ):
+                keep_score += weights.recent_bonus_points
 
             keep_score = round(min(max(keep_score, 0.0), 100.0), 2)
 
@@ -376,8 +388,8 @@ class ScoringEngine:
                     INSERT INTO media_items (
                         tmdb_id, media_type, title, year, added_at,
                         file_size_bytes, quality_profile, arr_id,
-                        arr_source, episode_count, series_status
-                    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                        arr_source, episode_count, series_status, poster_url
+                    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
                     ON CONFLICT (tmdb_id) DO UPDATE SET
                         title = EXCLUDED.title,
                         file_size_bytes = EXCLUDED.file_size_bytes,
@@ -386,6 +398,7 @@ class ScoringEngine:
                         arr_source = EXCLUDED.arr_source,
                         episode_count = EXCLUDED.episode_count,
                         series_status = EXCLUDED.series_status,
+                        poster_url = COALESCE(EXCLUDED.poster_url, media_items.poster_url),
                         updated_at = NOW()
                     """,
                     record.tmdb_id,
@@ -399,6 +412,7 @@ class ScoringEngine:
                     record.arr_source,
                     record.episode_count,
                     record.series_status,
+                    record.poster_url,
                 )
 
             # Get media_item IDs for FK references

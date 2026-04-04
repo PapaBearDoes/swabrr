@@ -7,8 +7,8 @@ TMDB API client. Fetches streaming availability (watch providers),
 ratings, vote counts, and resolves TVDB IDs to TMDB IDs.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.1.0
-LAST MODIFIED: 2026-04-02
+FILE VERSION: v1.2.0
+LAST MODIFIED: 2026-04-04
 COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
 Repository: https://github.com/PapaBearDoes/swabrr
@@ -36,6 +36,7 @@ class TMDBMediaInfo:
     streaming_service_count: int = 0
     genres: list[str] = field(default_factory=list)
     release_date: str | None = None
+    poster_path: str | None = None  # e.g. "/abc123.jpg"
 
 
 class TMDBClient(BaseClient):
@@ -121,6 +122,7 @@ class TMDBClient(BaseClient):
             streaming_service_count=len(providers),
             genres=[g.get("name", "") for g in details.get("genres", [])],
             release_date=details.get("release_date"),
+            poster_path=details.get("poster_path"),
         )
 
     async def get_series_info(self, tmdb_id: int) -> TMDBMediaInfo | None:
@@ -140,6 +142,7 @@ class TMDBClient(BaseClient):
             streaming_service_count=len(providers),
             genres=[g.get("name", "") for g in details.get("genres", [])],
             release_date=details.get("first_air_date"),
+            poster_path=details.get("poster_path"),
         )
 
     async def get_info(self, tmdb_id: int, media_type: str) -> TMDBMediaInfo | None:

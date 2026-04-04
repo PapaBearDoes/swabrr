@@ -7,7 +7,7 @@ Configuration manager for scoring weights and application settings.
 Reads from and writes to PostgreSQL via DBManager.
 
 ----------------------------------------------------------------------------
-FILE VERSION: v1.1.0
+FILE VERSION: v1.2.0
 LAST MODIFIED: 2026-04-04
 COMPONENT: swabrr-api
 CLEAN ARCHITECTURE: Compliant
@@ -46,6 +46,8 @@ class ConfigManager:
             candidate_threshold=float(row["candidate_threshold"]),
             classic_age_threshold=int(row["classic_age_threshold"]),
             classic_bonus_points=float(row["classic_bonus_points"]),
+            recent_age_threshold=int(row["recent_age_threshold"]),
+            recent_bonus_points=float(row["recent_bonus_points"]),
         )
 
     async def update_weights(self, weights: ScoringWeights) -> bool:
@@ -76,7 +78,9 @@ class ConfigManager:
                     cultural_value = $5,
                     candidate_threshold = $6,
                     classic_age_threshold = $7,
-                    classic_bonus_points = $8
+                    classic_bonus_points = $8,
+                    recent_age_threshold = $9,
+                    recent_bonus_points = $10
                 WHERE id = 1
                 """,
                 weights.watch_activity,
@@ -87,6 +91,8 @@ class ConfigManager:
                 weights.candidate_threshold,
                 weights.classic_age_threshold,
                 weights.classic_bonus_points,
+                weights.recent_age_threshold,
+                weights.recent_bonus_points,
             )
 
         self._log.success("Scoring weights updated")

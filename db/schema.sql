@@ -5,7 +5,7 @@
 -- Full PostgreSQL schema for Swabrr.
 -- Apply with: psql -U swabrr -d swabrr -f schema.sql
 --
--- FILE VERSION: v1.2.0
+-- FILE VERSION: v1.3.0
 -- LAST MODIFIED: 2026-04-04
 -- COMPONENT: swabrr-db
 -- ============================================================================
@@ -98,6 +98,8 @@ CREATE TABLE IF NOT EXISTS scoring_weights (
     candidate_threshold     NUMERIC(5,2) NOT NULL DEFAULT 30.00,
     classic_age_threshold   INTEGER NOT NULL DEFAULT 20,
     classic_bonus_points    NUMERIC(4,1) NOT NULL DEFAULT 5.0,
+    recent_age_threshold    INTEGER NOT NULL DEFAULT 2,
+    recent_bonus_points     NUMERIC(4,1) NOT NULL DEFAULT 5.0,
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT ck_weights_sum_100 CHECK (
@@ -215,8 +217,8 @@ CREATE TRIGGER trg_service_settings_updated_at
 -- ----------------------------------------------------------------------------
 -- Seed data: default scoring weights (single row)
 -- ----------------------------------------------------------------------------
-INSERT INTO scoring_weights (watch_activity, rarity, request_accountability, size_efficiency, cultural_value, candidate_threshold, classic_age_threshold, classic_bonus_points)
-VALUES (40.00, 20.00, 15.00, 15.00, 10.00, 30.00, 20, 5.0)
+INSERT INTO scoring_weights (watch_activity, rarity, request_accountability, size_efficiency, cultural_value, candidate_threshold, classic_age_threshold, classic_bonus_points, recent_age_threshold, recent_bonus_points)
+VALUES (40.00, 20.00, 15.00, 15.00, 10.00, 30.00, 20, 5.0, 2, 5.0)
 ON CONFLICT DO NOTHING;
 
 -- Seed data: service connection settings (all unconfigured by default)
