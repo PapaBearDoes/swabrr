@@ -15,9 +15,9 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Scores", icon: BarChart3 },
   { href: "/dashboard/candidates", label: "Candidates", icon: Target },
-  { href: "/dashboard/config", label: "Configuration", icon: Settings },
   { href: "/dashboard/protected", label: "Protected", icon: Shield },
   { href: "/dashboard/history", label: "Removal History", icon: History },
+  { href: "/dashboard/config", label: "Configuration", icon: Settings },
   { href: "/dashboard/settings", label: "Settings", icon: Plug },
 ];
 
